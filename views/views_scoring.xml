@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="oh_app_ext_action_scoring" model="ir.actions.act_window">
+        <field name="name">Scoring Frameworks</field>
+        <field name="res_model">oh.appraisal.scoring</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="oh_app_ext_view_scoring_list" model="ir.ui.view">
+        <field name="name">oh.appraisal.scoring.list</field>
+        <field name="model">oh.appraisal.scoring</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="scale_min"/>
+                <field name="scale_max"/>
+                <field name="company_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="oh_app_ext_view_scoring_form" model="ir.ui.view">
+        <field name="name">oh.appraisal.scoring.form</field>
+        <field name="model">oh.appraisal.scoring</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="scale_min"/>
+                        <field name="scale_max"/>
+                        <field name="company_id"/>
+                    </group>
+                    <group>
+                        <field name="description"/>
+                    </group>
+                    <notebook>
+                        <page string="Rating Labels">
+                            <field name="rating_line_ids">
+                                <list editable="bottom" model="oh.appraisal.scoring.line">
+                                    <field name="min_value"/>
+                                    <field name="max_value"/>
+                                    <field name="label"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_oh_appraisal_scoring" model="ir.actions.act_window">
+        <field name="name">Scoring Frameworks</field>
+        <field name="res_model">oh.appraisal.scoring</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Action -->
+    <record id="oh_app_ext_action_results" model="ir.actions.act_window">
+        <field name="name">Appraisal Results</field>
+        <field name="res_model">oh.appraisal.result</field>
+        <field name="view_mode">kanban,list,form,graph,pivot</field>
+    </record>
+
+    <!-- List -->
+    <record id="oh_app_ext_view_results_list" model="ir.ui.view">
+        <field name="name">oh.appraisal.result.list</field>
+        <field name="model">oh.appraisal.result</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="final_percentage"/>
+                <field name="rating_label"/>
+                <field name="date"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form -->
+    <record id="oh_app_ext_view_results_form" model="ir.ui.view">
+        <field name="name">oh.appraisal.result.form</field>
+        <field name="model">oh.appraisal.result</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="employee_id"/>
+                        <field name="final_percentage"/>
+                        <field name="rating_label"/>
+                        <field name="date"/>
+                    </group>
+                    <group>
+                        <field name="functional_score"/>
+                        <field name="role_score"/>
+                        <field name="common_score"/>
+                    </group>
+                    <group>
+                        <field name="notes" colspan="2"/>
+                    </group>
+                    <group>
+                        <field name="data_json" options="{'no_open': True}"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Graph (simple bar by employee) -->
+    <record id="oh_app_ext_view_results_graph" model="ir.ui.view">
+        <field name="name">oh.appraisal.result.graph</field>
+        <field name="model">oh.appraisal.result</field>
+        <field name="arch" type="xml">
+            <graph string="Results by Employee" type="bar">
+                <field name="employee_id" type="row"/>
+                <field name="final_percentage" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Pivot -->
+    <record id="oh_app_ext_view_results_pivot" model="ir.ui.view">
+        <field name="name">oh.appraisal.result.pivot</field>
+        <field name="model">oh.appraisal.result</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="employee_id" type="row"/>
+                <field name="final_percentage" type="measure"/>
+                <field name="company_id" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+</odoo>

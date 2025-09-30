@@ -1,0 +1,161 @@
+.o_oh_appraisal_dashboard {
+    padding: 2rem;
+    background-color: #f8f9fa;
+    height: 100%;
+}
+
+/* Header Styles */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.header-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.header-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #2b2b2b;
+}
+
+.header-subtitle {
+    color: #6c757d;
+    font-size: 1rem;
+}
+
+/* Grid Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.grid-item {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+}
+
+/* Item Headers */
+.item-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    gap: 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2b2b2b;
+}
+
+.item-header i {
+    font-size: 1.2rem;
+    color: #6366f1;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #4b5563;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background-color: white;
+}
+
+/* Weightage Distribution */
+.weightage-bars {
+    margin-bottom: 1rem;
+}
+
+.progress {
+    height: 2rem;
+    background: #e5e7eb;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+}
+
+.progress-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.875rem;
+    transition: width 0.3s ease;
+}
+
+.progress-segment.functional {
+    background-color: #10b981;
+}
+
+.progress-segment.role {
+    background-color: #3b82f6;
+}
+
+.progress-segment.common {
+    background-color: #f59e0b;
+}
+
+.weightage-inputs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.input-group {
+    display: flex;
+}
+
+.input-group-text {
+    padding: 0.5rem;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-left: none;
+    border-radius: 0 6px 6px 0;
+}
+
+/* Simulation Section */
+.btn-run {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.simulation-results {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    text-align: center;
+}
+
+.result-score, .result-rating {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.result-score .label, .result-rating .label {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.result-score .value, .result-rating .value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2b2b2b;
+}

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List View -->
+    <record id="oh_app_ext_view_template_list" model="ir.ui.view">
+        <field name="name">oh.appraisal.template.list</field>
+        <field name="model">oh.appraisal.template</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="template_type"/>
+                <field name="department_id" 
+                       />
+                <field name="job_id"
+                       />
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="oh_app_ext_view_template_form" model="ir.ui.view">
+        <field name="name">oh.appraisal.template.form</field>
+        <field name="model">oh.appraisal.template</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object" 
+                                class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button" 
+                                   options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Template Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="template_type" widget="radio"/>
+                            <field name="code"/>
+                            <field name="department_id" 
+                                  />
+                            <field name="job_id" 
+                                   />
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="common_factor" 
+                                   />
+                            <field name="sequence"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Evaluation Items">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="max_score"/>
+                                    <field name="weight"/>
+                                    <field name="description"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Description">
+                            <field name="description" placeholder="Add template description..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="oh_app_ext_view_template_search" model="ir.ui.view">
+        <field name="name">oh.appraisal.template.search</field>
+        <field name="model">oh.appraisal.template</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="department_id"/>
+                <field name="job_id"/>
+                <separator/>
+                <filter string="Active" name="active" domain="[('active','=',True)]"/>
+                <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Type" name="group_type" context="{'group_by':'template_type'}"/>
+                    <filter string="Department" name="group_department" context="{'group_by':'department_id'}"/>
+                    <filter string="Job Position" name="group_job" context="{'group_by':'job_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="oh_app_ext_action_templates" model="ir.actions.act_window">
+        <field name="name">Appraisal Templates</field>
+        <field name="res_model">oh.appraisal.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="oh_app_ext_view_template_search"/>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first appraisal template!
+            </p>
+            <p>
+                Templates define evaluation criteria for departments, roles, or common factors.
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="oh_app_ext_action_master" model="ir.actions.act_window">
+    <field name="name">Appraisal Masters</field>
+    <field name="res_model">oh.appraisal.master</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <!-- Simulation action (transient wizard) -->
+  <record id="oh_app_ext_action_simulation" model="ir.actions.act_window">
+    <field name="name">Simulation</field>
+    <field name="res_model">oh.appraisal.simulation</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+  </record>
+
+  <record id="oh_app_ext_view_master_form" model="ir.ui.view">
+    <field name="name">oh.appraisal.master.form</field>
+    <field name="model">oh.appraisal.master</field>
+    <field name="arch" type="xml">
+      <form string="Appraisal Master">
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="company_id"/>
+            <field name="description"/>
+          </group>
+
+          <group string="Context">
+            <field name="industry_type"/>
+            <field name="assessment_period"/>
+          </group>
+
+          <group string="Templates" colspan="2">
+            <field name="master_template_id"/>
+            <field name="department_template_ids" widget="many2many_tags"/>
+            <field name="role_template_ids" widget="many2many_tags"/>
+            <field name="common_template_ids" widget="many2many_tags"/>
+          </group>
+
+          <group string="Weightages (must sum to 100)">
+            <field name="weight_functional"/>
+            <field name="weight_role"/>
+            <field name="weight_common"/>
+          </group>
+
+          <group string="Scoring &amp; Framework">
+            <field name="scoring_template_id"/>
+            <field name="assessment_framework_id"/>
+          </group>
+
+          <group>
+            <button name="%(oh_app_ext_action_simulation)d" type="action" string="Run Simulation" class="btn-primary"/>
+            <field name="last_sim_final_percentage" readonly="1"/>
+            <field name="last_sim_rating" readonly="1"/>
+          </group>
+
+          <group string="Last Simulation JSON">
+            <field name="last_sim_result" widget="text" readonly="1"/>
+          </group>
+
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="oh_app_ext_view_master_list" model="ir.ui.view">
+    <field name="name">oh.appraisal.master.list</field>
+    <field name="model">oh.appraisal.master</field>
+    <field name="arch" type="xml">
+      <list>
+        <field name="name"/>
+        <field name="company_id"/>
+        <field name="industry_type"/>
+        <field name="assessment_period"/>
+      </list>
+    </field>
+  </record>
+</odoo>

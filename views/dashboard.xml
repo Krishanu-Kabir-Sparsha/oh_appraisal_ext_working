@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_oh_appraisal_dashboard" model="ir.actions.client">
+        <field name="name">Appraisal Dashboard</field>
+        <field name="tag">oh_appraisal_dashboard</field>
+    </record>
+
+    <menuitem id="menu_oh_appraisal_dashboard"
+              name="Dashboard"
+              parent="oh_appraisal.hr_appraisal_menu_root"
+              action="action_oh_appraisal_dashboard"
+              sequence="1"/>
+</odoo>

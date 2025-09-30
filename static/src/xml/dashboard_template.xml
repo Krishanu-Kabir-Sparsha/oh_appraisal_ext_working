@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="oh_appraisal_ext.Dashboard" owl="1">
+        <div class="o_oh_appraisal_dashboard">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <div class="header-icon">🎯</div>
+                <div class="header-title">Universal Employee Appraisal System</div>
+                <div class="header-subtitle">Integrated Configuration &amp; Assessment Platform</div>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="dashboard-grid">
+                <!-- Master Configuration -->
+                <div class="grid-item master-config">
+                    <div class="item-header">
+                        <i class="fa fa-cog"/>
+                        <span>Master Configuration</span>
+                    </div>
+                    <div class="item-content">
+                        <div class="form-group">
+                            <label>Industry Type</label>
+                            <select class="form-control" t-model="state.master.industry">
+                                <option value="">Select Industry</option>
+                                <t t-foreach="state.industries" t-as="industry" t-key="industry.id">
+                                    <option t-att-value="industry.id">
+                                        <t t-esc="industry.name"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Company</label>
+                            <select class="form-control" 
+                                    t-model="state.master.company"
+                                    t-on-change="onCompanyChange">
+                                <option value="">Select Company</option>
+                                <t t-foreach="state.companies" t-as="company" t-key="company.id">
+                                    <option t-att-value="company.id" 
+                                            t-att-selected="company.id === state.currentCompany">
+                                        <t t-esc="company.name"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Department Setup -->
+                <div class="grid-item department-setup">
+                    <div class="item-header">
+                        <i class="fa fa-building"/>
+                        <span>Department Setup</span>
+                    </div>
+                    <div class="item-content">
+                        <div class="form-group">
+                            <label>Department</label>
+                            <select class="form-control" t-model="state.department.selected">
+                                <option value="">Select Department</option>
+                                <t t-foreach="state.departments" t-as="dept" t-key="dept.id">
+                                    <option t-att-value="dept.id">
+                                        <t t-esc="dept.name"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Assessment Period</label>
+                            <select class="form-control" t-model="state.department.assessment_period">
+                                <option value="annual">Annual</option>
+                                <option value="semi-annual">Semi-Annual</option>
+                                <option value="quarterly">Quarterly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Role Setup -->
+                <div class="grid-item role-setup">
+                    <div class="item-header">
+                        <i class="fa fa-user-tie"/>
+                        <span>Role Setup</span>
+                    </div>
+                    <div class="item-content">
+                        <div class="form-group">
+                            <label>Job Position</label>
+                            <select class="form-control" t-model="state.role.selected">
+                                <option value="">Select Position</option>
+                                <t t-foreach="state.jobPositions" t-as="job" t-key="job.id">
+                                    <option t-att-value="job.id">
+                                        <t t-esc="job.name"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="grid-item weightage">
+                    <div class="item-header">
+                        <i class="fa fa-balance-scale"/>
+                        <span>Weightage Distribution</span>
+                    </div>
+                    <div class="item-content">
+                        <div class="weightage-bars">
+                            <div class="progress">
+                                <div class="progress-segment functional" t-att-style="'width: ' + state.weightage.functional + '%'">
+                                    <span>Dept: <t t-esc="state.weightage.functional"/>%</span>
+                                </div>
+                                <div class="progress-segment role" t-att-style="'width: ' + state.weightage.role + '%'">
+                                    <span>Role: <t t-esc="state.weightage.role"/>%</span>
+                                </div>
+                                <div class="progress-segment common" t-att-style="'width: ' + state.weightage.common + '%'">
+                                    <span>Common: <t t-esc="state.weightage.common"/>%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="weightage-inputs">
+                            <div class="input-group">
+                                <input type="number" class="form-control" t-model="state.weightage.functional" 
+                                       t-on-change="(ev) => this.onWeightageChange('functional', ev.target.value)"/>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <input type="number" class="form-control" t-model="state.weightage.role"
+                                       t-on-change="(ev) => this.onWeightageChange('role', ev.target.value)"/>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <input type="number" class="form-control" t-model="state.weightage.common"
+                                       t-on-change="(ev) => this.onWeightageChange('common', ev.target.value)"/>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-item framework">
+                    <div class="item-header">
+                        <i class="fa fa-chart-line"/>
+                        <span>Assessment Framework</span>
+                    </div>
+                    <div class="item-content">
+                        <div class="form-group">
+                            <label>Primary Framework</label>
+                            <select class="form-control" t-model="state.framework.primary">
+                                <option value="360">360-Degree Feedback</option>
+                                <option value="kpi">KPI-Based</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Scoring Scale</label>
+                            <select class="form-control" t-model="state.framework.scale">
+                                <option value="1-5">1-5 Scale</option>
+                                <option value="1-10">1-10 Scale</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-item simulation">
+                    <div class="item-header">
+                        <i class="fa fa-lightbulb"/>
+                        <span>Simulation</span>
+                    </div>
+                    <div class="item-content">
+                        <button class="btn btn-primary btn-run" t-on-click="runSimulation">
+                            Run Sample Appraisal
+                        </button>
+                        <div class="simulation-results">
+                            <div class="result-score">
+                                <span class="label">Final Score:</span>
+                                <span class="value"><t t-esc="state.simulation.score"/></span>
+                            </div>
+                            <div class="result-rating">
+                                <span class="label">Rating:</span>
+                                <span class="value"><t t-esc="state.simulation.rating"/></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
