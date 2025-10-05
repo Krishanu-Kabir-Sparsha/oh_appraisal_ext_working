@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # from . import appraisal_industry
 from . import industry
+from . import res_users_inherit
 from . import appraisal_master
 from . import appraisal_framework
 from . import appraisal_templates
