@@ -7,18 +7,18 @@
               sequence="100"
               groups="oh_appraisal.oh_appraisal_group_manager"/>
 
-    <!-- Industry Types in Master Template -->
-    <menuitem id="menu_oh_appraisal_industry"
+    <!-- Master Template (Dashboard Interface) -->
+    <menuitem id="menu_oh_appraisal_master_dashboard"
               name="Master Template"
               parent="menu_oh_appraisal_configuration"
-              action="action_oh_appraisal_industry"
-              sequence="10"/>
+              action="oh_app_ext_action_master_dashboard"
+              sequence="5"/>
     
-    <!-- Primary Framework Template -->
-    <menuitem id="menu_oh_appraisal_primary_framework"
-              name="Primary Framework Template"
+    <!-- Assessment Framework Template (OKR) -->
+    <menuitem id="menu_oh_appraisal_okr_template"
+              name="Assessment Framework Template"
               parent="menu_oh_appraisal_configuration"
-              action="action_oh_appraisal_primary_framework"
+              action="action_oh_appraisal_okr_template"
               sequence="20"/>
     
     <!-- Scoring Scale Template -->
@@ -26,7 +26,14 @@
               name="Scoring Scale Template"
               parent="menu_oh_appraisal_configuration"
               action="action_oh_appraisal_scoring"
-              sequence="10"/>
+              sequence="30"/>
+    
+    <!-- Appraisal Templates -->
+    <!-- <menuitem id="menu_oh_appraisal_templates"
+              name="Appraisal Templates"
+              parent="menu_oh_appraisal_configuration"
+              action="oh_app_ext_action_templates"
+              sequence="40"/> -->
     
     
     

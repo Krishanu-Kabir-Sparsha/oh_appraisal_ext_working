@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View -->
+    <record id="oh_appraisal_okr_template_view_form" model="ir.ui.view">
+        <field name="name">oh.appraisal.okr.template.form</field>
+        <field name="model">oh.appraisal.okr.template</field>
+        <field name="arch" type="xml">
+            <form string="OKR Template">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object" 
+                                class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button" 
+                                   options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
+                    
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="OKR Template Name"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="company_id" groups="base.group_multi_company" 
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <!-- Objective Section -->
+                        <page string="📋 Objective" name="objective">
+                            <group>
+                                <group string="Objective Details">
+                                    <field name="objective_title" 
+                                           placeholder="Enter the main objective"/>
+                                    <field name="priority"/>
+                                    <field name="alignment" widget="radio"/>
+                                    <field name="objective_weightage"/>
+                                </group>
+                                <group string="Description">
+                                    <field name="objective_description" 
+                                           widget="html"
+                                           placeholder="Describe the objective in detail..."
+                                           options="{'style-inline': true, 'resizable': false}"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- Key Results Section -->
+                        <page string="🎯 Key Results" name="key_results">
+                            <field name="key_result_ids">
+                                <list string="Key Results" editable="bottom" 
+                                      decoration-success="progress &gt;= 100"
+                                      decoration-info="progress &gt;= 75 and progress &lt; 100"
+                                      decoration-warning="progress &gt;= 50 and progress &lt; 75"
+                                      decoration-danger="progress &lt; 50">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="key_result_title"/>
+                                    <field name="metric"/>
+                                    
+                                    <!-- Target Value Group -->
+                                    <field name="target_operator" optional="hide"/>
+                                    <field name="target_value"/>
+                                    <field name="target_unit" optional="hide"/>
+                                    <field name="target_period" optional="hide"/>
+                                    <field name="target_display" string="Target"/>
+                                    
+                                    <!-- Actual Value Group -->
+                                    <field name="actual_operator" optional="hide"/>
+                                    <field name="actual_value"/>
+                                    <field name="actual_unit" optional="hide"/>
+                                    <field name="actual_period" optional="hide"/>
+                                    <field name="actual_display" string="Actual"/>
+                                    
+                                    <field name="progress" widget="progressbar"/>
+                                    <field name="weightage"/>
+                                    <field name="data_source"/>
+                                </list>
+                                <form string="Key Result">
+                                    <sheet>
+                                        <div class="oe_title">
+                                            <label for="key_result_title"/>
+                                            <h1>
+                                                <field name="key_result_title" 
+                                                       placeholder="Key Result Title"/>
+                                            </h1>
+                                        </div>
+                                        
+                                        <group>
+                                            <group string="Measurement">
+                                                <field name="metric"/>
+                                                <field name="data_source"/>
+                                                <field name="weightage"/>
+                                            </group>
+                                            <group string="Progress">
+                                                <field name="progress" widget="percentpie"/>
+                                                <field name="sequence"/>
+                                            </group>
+                                        </group>
+
+                                        <group string="Target Value">
+                                            <group>
+                                                <label for="target_operator" string="Target"/>
+                                                <div class="o_row">
+                                                    <field name="target_operator" class="oe_inline"/>
+                                                    <field name="target_value" class="oe_inline"/>
+                                                    <field name="target_unit" 
+                                                           placeholder="unit (e.g., sales, rejections)" 
+                                                           class="oe_inline"/>
+                                                </div>
+                                            </group>
+                                            <group>
+                                                <field name="target_period" 
+                                                       placeholder="e.g., in Q1, per month"/>
+                                                <field name="target_display" readonly="1"/>
+                                            </group>
+                                        </group>
+
+                                        <group string="Actual Value">
+                                            <group>
+                                                <label for="actual_operator" string="Actual"/>
+                                                <div class="o_row">
+                                                    <field name="actual_operator" class="oe_inline"/>
+                                                    <field name="actual_value" class="oe_inline"/>
+                                                    <field name="actual_unit" 
+                                                           placeholder="unit" 
+                                                           class="oe_inline"/>
+                                                </div>
+                                            </group>
+                                            <group>
+                                                <field name="actual_period" 
+                                                       placeholder="e.g., in Q1, per month"/>
+                                                <field name="actual_display" readonly="1"/>
+                                            </group>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                            
+                            <group class="mt-4">
+                                <group>
+                                    <field name="total_key_result_weightage" 
+                                           string="Total Weightage" 
+                                           readonly="1"
+                                           decoration-danger="total_key_result_weightage != 100"
+                                           decoration-success="total_key_result_weightage == 100"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- General Info -->
+                        <page string="ℹ️ General Info" name="general_info">
+                            <group>
+                                <field name="description" 
+                                       widget="html"
+                                       placeholder="Additional notes and information..."
+                                       options="{'style-inline': true}"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+            </form>
+        </field>
+    </record>
+
+    <!-- list View -->
+    <record id="oh_appraisal_okr_template_view_list" model="ir.ui.view">
+        <field name="name">oh.appraisal.okr.template.list</field>
+        <field name="model">oh.appraisal.okr.template</field>
+        <field name="arch" type="xml">
+            <list string="OKR Templates" 
+                  decoration-info="priority=='high'"
+                  decoration-muted="active==False">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="objective_title"/>
+                <field name="priority" widget="badge" 
+                       decoration-danger="priority=='high'"
+                       decoration-warning="priority=='medium'"
+                       decoration-success="priority=='low'"/>
+                <field name="alignment" widget="badge"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="key_result_count"/>
+                <field name="total_key_result_weightage" 
+                       decoration-danger="total_key_result_weightage != 100"
+                       decoration-success="total_key_result_weightage == 100"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="oh_appraisal_okr_template_view_search" model="ir.ui.view">
+        <field name="name">oh.appraisal.okr.template.search</field>
+        <field name="model">oh.appraisal.okr.template</field>
+        <field name="arch" type="xml">
+            <search string="Search OKR Templates">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="objective_title"/>
+                <field name="company_id"/>
+                
+                <filter string="High Priority" name="high_priority" 
+                        domain="[('priority','=','high')]"/>
+                <filter string="Medium Priority" name="medium_priority" 
+                        domain="[('priority','=','medium')]"/>
+                <filter string="Low Priority" name="low_priority" 
+                        domain="[('priority','=','low')]"/>
+                
+                <separator/>
+                <filter string="Company Level" name="company_alignment" 
+                        domain="[('alignment','=','company')]"/>
+                <filter string="Department Level" name="department_alignment" 
+                        domain="[('alignment','=','department')]"/>
+                <filter string="Team Level" name="team_alignment" 
+                        domain="[('alignment','=','team')]"/>
+                
+                <separator/>
+                <filter string="Active" name="active" 
+                        domain="[('active','=',True)]"/>
+                <filter string="Archived" name="inactive" 
+                        domain="[('active','=',False)]"/>
+                
+                <separator/>
+                <filter string="Incomplete Weightage" name="incomplete_weightage"
+                        domain="[('total_key_result_weightage','!=',100)]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Priority" name="group_priority" 
+                            context="{'group_by':'priority'}"/>
+                    <filter string="Alignment" name="group_alignment" 
+                            context="{'group_by':'alignment'}"/>
+                    <filter string="Company" name="group_company" 
+                            context="{'group_by':'company_id'}"/>
+                    <filter string="Start Date" name="group_start_date" 
+                            context="{'group_by':'start_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Kanban View -->
+    <record id="oh_appraisal_okr_template_view_kanban" model="ir.ui.view">
+        <field name="name">oh.appraisal.okr.template.kanban</field>
+        <field name="model">oh.appraisal.okr.template</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <field name="name"/>
+                <field name="objective_title"/>
+                <field name="priority"/>
+                <field name="alignment"/>
+                <field name="key_result_count"/>
+                <field name="total_key_result_weightage"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_content">
+                            <div class="o_kanban_record_title">
+                                <field name="name"/>
+                            </div>
+                            <div class="o_kanban_record_subtitle">
+                                <field name="objective_title"/>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <field name="priority" widget="priority"/>
+                                    <span class="badge badge-pill"><field name="alignment"/></span>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <span><i class="fa fa-trophy"/> <field name="key_result_count"/> KRs</span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_oh_appraisal_okr_template" model="ir.actions.act_window">
+        <field name="name">Assessment Framework Template</field>
+        <field name="res_model">oh.appraisal.okr.template</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="search_view_id" ref="oh_appraisal_okr_template_view_search"/>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first OKR template!
+            </p>
+            <p>
+                Define Objectives and Key Results (OKRs) to measure and track performance effectively.
+            </p>
+        </field>
+    </record>
+</odoo>

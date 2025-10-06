@@ -9,7 +9,8 @@ from . import appraisal_scoring
 from . import appraisal_result
 from . import hr_appraisal_inherit
 from . import appraisal_simulation
-from . import primary_framework
-from . import web_services
+from . import okr_template
+# from . import primary_framework
+# from . import web_services
 # from . import okr
 # from . import kpi

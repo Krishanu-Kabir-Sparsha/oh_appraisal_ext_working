@@ -20,14 +20,21 @@
                     <div class="item-content">
                         <div class="form-group">
                             <label>Industry Type</label>
-                            <select class="form-control" t-model="state.master.industry">
-                                <option value="">Select Industry</option>
-                                <t t-foreach="state.industries" t-as="industry" t-key="industry.id">
-                                    <option t-att-value="industry.id">
-                                        <t t-esc="industry.name"/>
-                                    </option>
-                                </t>
-                            </select>
+                            <div class="input-with-button">
+                                <select class="form-control" t-model="state.master.industry">
+                                    <option value="">Select Industry</option>
+                                    <t t-foreach="state.industries" t-as="industry" t-key="industry.id">
+                                        <option t-att-value="industry.id">
+                                            <t t-esc="industry.name"/>
+                                        </option>
+                                    </t>
+                                </select>
+                                <button class="btn btn-sm btn-secondary ml-2" 
+                                        t-on-click="openIndustryTypes"
+                                        title="Configure Industry Types">
+                                    <i class="fa fa-cog"/>
+                                </button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Company</label>
@@ -36,8 +43,7 @@
                                     t-on-change="onCompanyChange">
                                 <option value="">Select Company</option>
                                 <t t-foreach="state.companies" t-as="company" t-key="company.id">
-                                    <option t-att-value="company.id" 
-                                            t-att-selected="company.id === state.currentCompany">
+                                    <option t-att-value="company.id">
                                         <t t-esc="company.name"/>
                                     </option>
                                 </t>

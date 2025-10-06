@@ -21,4 +21,11 @@
         <field name="global" eval="True"/>
         <field name="domain_force">['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
     </record>
+
+    <record id="oh_appraisal_okr_template_comp_rule" model="ir.rule">
+        <field name="name">OKR Template Multi-Company</field>
+        <field name="model_id" ref="model_oh_appraisal_okr_template"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
+    </record>
 </odoo>

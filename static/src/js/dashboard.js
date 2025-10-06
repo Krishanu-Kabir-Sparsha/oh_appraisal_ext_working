@@ -225,6 +225,18 @@ class AppraisalDashboard extends Component {
             console.error("Error running simulation:", error);
         }
     }
+
+    openIndustryTypes() {
+        // Open Industry Types configuration in a new action
+        this.env.services.action.doAction({
+            type: 'ir.actions.act_window',
+            name: 'Industry Types',
+            res_model: 'oh.appraisal.industry',
+            views: [[false, 'list'], [false, 'form']],
+            view_mode: 'list,form',
+            target: 'current',
+        });
+    }
 }
 
 AppraisalDashboard.template = "oh_appraisal_ext.Dashboard";

@@ -77,6 +77,21 @@
     background-color: white;
 }
 
+/* Input with Button */
+.input-with-button {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.input-with-button .form-control {
+    flex: 1;
+}
+
+.input-with-button .btn {
+    flex-shrink: 0;
+}
+
 /* Weightage Distribution */
 .weightage-bars {
     margin-bottom: 1rem;
