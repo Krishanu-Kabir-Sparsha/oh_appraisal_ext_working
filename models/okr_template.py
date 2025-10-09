@@ -8,17 +8,18 @@ class OHAppraisalOKRTemplate(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'sequence, id'
 
-    name = fields.Char('Template Name', required=True, tracking=True)
+    name = fields.Char('Template Name', required=False, tracking=True)
     code = fields.Char('Code', tracking=True)
     sequence = fields.Integer('Sequence', default=10)
     active = fields.Boolean('Active', default=True, tracking=True)
     company_id = fields.Many2one('res.company', 'Company', 
                                 default=lambda self: self.env.company,
                                 domain=lambda self: [('id', 'in', self.env.user.company_ids.ids)])
+    
     description = fields.Html('Description')
     
     # Objective Section
-    objective_title = fields.Char('Objective Title', required=True, tracking=True)
+    objective_title = fields.Char('Objective Title', required=False, tracking=True)
     objective_description = fields.Html('Objective Description', 
                                        help="Rich text description of the objective")
     priority = fields.Selection([
@@ -31,14 +32,22 @@ class OHAppraisalOKRTemplate(models.Model):
                                       digits=(5, 2),
                                       default=100.0,
                                       help="Weightage of this objective in percentage")
-    start_date = fields.Date('Start Date', required=True, tracking=True)
-    end_date = fields.Date('End Date', required=True, tracking=True)
-    alignment = fields.Selection([
-        ('company', 'Company'),
-        ('department', 'Department'),
-        ('team', 'Team')
-    ], string='Alignment', default='department', required=True, tracking=True)
+    start_date = fields.Date('Start Date', required=False, tracking=True)
+    end_date = fields.Date('End Date', required=False, tracking=True)
+
+    department_id = fields.Many2one('hr.department', string='Department', 
+                                  domain="[('company_id', '=', company_id)]",
+                                  tracking=True,
+                                  help="Department this OKR template applies to")
     
+    team_id = fields.Many2one('oh.appraisal.team', string='Team',
+                             domain="[('company_id', '=', company_id)]",
+                             tracking=True,
+                             help="Team this OKR template applies to")
+    # Objective Weightages per Team
+    weightage_ids = fields.One2many('oh.appraisal.okr.weightage',
+                                'okr_template_id',
+                                string='Objective Weightages')
     # Key Results
     key_result_ids = fields.One2many('oh.appraisal.okr.key.result', 
                                     'okr_template_id', 
@@ -75,6 +84,32 @@ class OHAppraisalOKRTemplate(models.Model):
         for record in self:
             if record.objective_weightage < 0 or record.objective_weightage > 100:
                 raise ValidationError(_("Objective Weightage must be between 0 and 100."))
+
+    @api.onchange('company_id')
+    def _onchange_company_id(self):
+        if self.company_id:
+            # Clear department and team if company changes
+            if self.department_id and self.department_id.company_id != self.company_id:
+                self.department_id = False
+            if self.team_id and self.team_id.company_id != self.company_id:
+                self.team_id = False
+            
+            # Update domains for department_id and team_id
+            return {
+                'domain': {
+                    'department_id': [('company_id', '=', self.company_id.id)],
+                    'team_id': [('company_id', '=', self.company_id.id)]
+                }
+            }
+        else:
+            self.department_id = False
+            self.team_id = False
+            return {
+                'domain': {
+                    'department_id': [],
+                    'team_id': []
+                }
+            }
 
 
 class OHAppraisalOKRKeyResult(models.Model):

@@ -23,3 +23,12 @@ access_oh_appraisal_okr_template_user,oh.appraisal.okr.template.user,model_oh_ap
 access_oh_appraisal_okr_template_manager,oh.appraisal.okr.template.manager,model_oh_appraisal_okr_template,oh_appraisal.oh_appraisal_group_manager,1,1,1,1
 access_oh_appraisal_okr_key_result_user,oh.appraisal.okr.key.result.user,model_oh_appraisal_okr_key_result,oh_appraisal.oh_appraisal_group_employee,1,0,0,0
 access_oh_appraisal_okr_key_result_manager,oh.appraisal.okr.key.result.manager,model_oh_appraisal_okr_key_result,oh_appraisal.oh_appraisal_group_manager,1,1,1,1
+
+access_hr_employee_appraisal_user,hr.employee.appraisal.user,hr.model_hr_employee,oh_appraisal.oh_appraisal_group_employee,1,0,0,0
+access_hr_employee_appraisal_manager,hr.employee.appraisal.manager,hr.model_hr_employee,oh_appraisal.oh_appraisal_group_manager,1,1,0,0
+
+access_oh_appraisal_team_user,oh.appraisal.team.user,model_oh_appraisal_team,oh_appraisal.oh_appraisal_group_employee,1,0,0,0
+access_oh_appraisal_team_manager,oh.appraisal.team.manager,model_oh_appraisal_team,oh_appraisal.oh_appraisal_group_manager,1,1,1,1
+
+access_oh_appraisal_okr_weightage_user,oh.appraisal.okr.weightage.user,model_oh_appraisal_okr_weightage,oh_appraisal.oh_appraisal_group_employee,1,0,0,0
+access_oh_appraisal_okr_weightage_manager,oh.appraisal.okr.weightage.manager,model_oh_appraisal_okr_weightage,oh_appraisal.oh_appraisal_group_manager,1,1,1,1
