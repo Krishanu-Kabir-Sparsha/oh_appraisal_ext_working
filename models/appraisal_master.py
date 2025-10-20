@@ -26,6 +26,7 @@ class OHAppraisalMaster(models.Model):
         ('annual', 'Annual')
     ], string="Assessment Period", help="Define how often appraisals are conducted.")
 
+    
     # Template links (no defaults)
     master_template_id = fields.Many2one('oh.appraisal.template', domain=[('template_type','=','master')], string='Master Template', help="Optional master template that may include top-level KPIs.")
     department_template_ids = fields.Many2many('oh.appraisal.template', 'oh_app_master_department_rel', 'master_id','template_id', domain=[('template_type','=','department')], string='Department Templates', help="Department-level templates. Admins select relevant templates here.")

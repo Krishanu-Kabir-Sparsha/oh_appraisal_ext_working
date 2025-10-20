@@ -24,15 +24,18 @@
 
                     <group>
                         <group>
-                            <field name="code"/>
+                            <field name="goal"/>
+                            <field name="priority"/>
+                            
+                        </group>
+                        <group>
                             <field name="company_id" 
                                 groups="base.group_multi_company" 
                                 options="{'no_create': True, 'no_open': True}"
                                 widget="selection"/>
-                            <!-- <field name="department_id" 
-                                options="{'no_create': True, 'no_open': True}"
-                                context="{'default_company_id': company_id}"/> -->
-                            
+                            <field name="department_id" 
+                                            options="{'no_create': True, 'no_open': True}" 
+                                            context="{'default_company_id': company_id}"/>
                         </group>
                         <group>
                             <field name="start_date"/>
@@ -47,10 +50,8 @@
                                 <group string="Team Objective Details">
                                     <field name="objective_title" 
                                            placeholder="Enter the main objective"/>
-                                    <field name="priority"/>
-                                    <field name="department_id" 
-                                            options="{'no_create': True, 'no_open': True}" 
-                                            context="{'default_company_id': company_id}"/>
+                                    <!-- <field name="priority"/> -->
+                                    
                                     <label for="team_id" string="Team"/>
                                     <div class="o_row">
                                         <field name="team_id" 
@@ -66,31 +67,66 @@
                                                 icon="fa-cog"/>
                                     </div>
                                     <div class="text-muted">
-                                        Select a team or configure a new one
+                                        Create / Configure Teams from the configure button. 
+                                        Teams are linked to Departments and help in allocating weightages effectively from the down below ↓. 
                                     </div>
                                     
                                     <!-- <field name="objective_weightage"/> -->
                                 </group>
-                                <group string="Description">
-                                    <field name="objective_description" 
-                                           widget="html"
-                                           placeholder="Describe the objective in detail..."
-                                           options="{'style-inline': true, 'resizable': false}"/>
+                                <group string="Team Objective Breakdown">
+                                    <field name="objective_breakdown_ids">
+                                        <list editable="bottom">
+                                            <field name="objective_item" placeholder="Enter objective item..."/>
+                                            <field name="priority"/>
+                                        </list>
+                                    </field>
                                 </group>
                                 <!-- Objective Weightage Section -->
-                                    <separator string="Objective Weightage"/>
+                                <separator string="Objective Weightage"/>
+                                <group>
+                                    <group string="Department Budget (from Dashboard)">
+                                        <label for="department_budget_functional" string="Available Budgets"/>
+                                        <div>
+                                            <span>Dept: <field name="department_budget_functional" class="oe_inline"/> %</span> |
+                                            <span>Role: <field name="department_budget_role" class="oe_inline"/> %</span> |
+                                            <span>Common: <field name="department_budget_common" class="oe_inline"/> %</span>
+                                        </div>
+                                    </group>
+                                    <group string="Allocated to Teams">
+                                        <label for="allocated_functional" string="Currently Allocated"/>
+                                        <div>
+                                            <span>Dept: <field name="allocated_functional" class="oe_inline"
+                                                decoration-danger="allocated_functional &gt; department_budget_functional"
+                                                decoration-success="allocated_functional &lt;= department_budget_functional"/> %</span> |
+                                            <span>Role: <field name="allocated_role" class="oe_inline"
+                                                decoration-danger="allocated_role &gt; department_budget_role"
+                                                decoration-success="allocated_role &lt;= department_budget_role"/> %</span> |
+                                            <span>Common: <field name="allocated_common" class="oe_inline"/> %</span>
+                                        </div>
+                                    </group>
+                                </group>
                                     <field name="weightage_ids">
                                         <list editable="bottom">
                                             <field name="sequence" widget="handle"/>
                                             <field name="team_id" 
-                                                options="{'no_create': True, 'no_open': True}"/>
-                                            <field name="department_weightage"/>
-                                            <field name="role_weightage"/>
-                                            <field name="common_weightage"/>
-                                            <field name="total_weightage" 
-                                                decoration-danger="total_weightage != 100"
-                                                decoration-success="total_weightage == 100"/>
-                                            <field name="company_id" invisible="1"/>
+                                                options="{'no_create': True, 'no_open': True}"
+                                                domain="[('company_id', '=', parent.company_id), 
+                                                        ('department_id', '=', parent.department_id)]"
+                                                width="200"/>
+                                            <field name="department_weightage" 
+                                                sum="Total Dept %"
+                                                decoration-danger="department_weightage > 0 and parent.allocated_functional > parent.department_budget_functional"
+                                                width="150"/>
+                                            <field name="role_weightage" 
+                                                sum="Total Role %"
+                                                decoration-danger="role_weightage > 0 and parent.allocated_role > parent.department_budget_role"
+                                                width="150"/>
+                                            <field name="common_weightage" 
+                                                sum="Total Common %"
+                                                readonly="1"
+                                                decoration-danger="common_weightage > 0 and parent.allocated_common > parent.department_budget_common"
+                                                width="150"/>
+                                            <!-- <field name="company_id" invisible="1"/> -->
                                         </list>
                                     </field>
                             </group>
@@ -98,104 +134,315 @@
 
                         <!-- Key Results Section -->
                         <page string="🎯 Key Results" name="key_results">
-                            <field name="key_result_ids">
-                                <list string="Key Results" editable="bottom" 
-                                      decoration-success="progress &gt;= 100"
-                                      decoration-info="progress &gt;= 75 and progress &lt; 100"
-                                      decoration-warning="progress &gt;= 50 and progress &lt; 75"
-                                      decoration-danger="progress &lt; 50">
-                                    <field name="sequence" widget="handle"/>
-                                    <field name="key_result_title"/>
-                                    <field name="metric"/>
-                                    
-                                    <!-- Target Value Group -->
-                                    <field name="target_operator" optional="hide"/>
-                                    <field name="target_value"/>
-                                    <field name="target_unit" optional="hide"/>
-                                    <field name="target_period" optional="hide"/>
-                                    <field name="target_display" string="Target"/>
-                                    
-                                    <!-- Actual Value Group -->
-                                    <field name="actual_operator" optional="hide"/>
-                                    <field name="actual_value"/>
-                                    <field name="actual_unit" optional="hide"/>
-                                    <field name="actual_period" optional="hide"/>
-                                    <field name="actual_display" string="Actual"/>
-                                    
-                                    <field name="progress" widget="progressbar"/>
-                                    <field name="weightage"/>
-                                    <field name="data_source"/>
-                                </list>
-                                <form string="Key Result">
-                                    <sheet>
-                                        <div class="oe_title">
-                                            <label for="key_result_title"/>
-                                            <h1>
-                                                <field name="key_result_title" 
-                                                       placeholder="Key Result Title"/>
-                                            </h1>
-                                        </div>
-                                        
-                                        <group>
-                                            <group string="Measurement">
-                                                <field name="metric"/>
-                                                <field name="data_source"/>
-                                                <field name="weightage"/>
+                            <!-- Department Weightage Table -->
+                            <group string="Department Weightage" name="department_weightage">
+                                <field name="department_key_result_ids" context="{'weightage_type': 'department'}">
+                                    <list string="Department Key Results" editable="bottom" 
+                                        decoration-success="progress &gt;= 100"
+                                        decoration-info="progress &gt;= 75 and progress &lt; 100"
+                                        decoration-warning="progress &gt;= 50 and progress &lt; 75"
+                                        decoration-danger="progress &lt; 50"
+                                        class="o_key_result_list">
+                                        <!-- Department list fields -->
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="key_objective_breakdown"
+                                            options="{'no_create': True, 'no_open': True}"
+                                            width="200"/>
+                                        <field name="breakdown_priority" 
+                                            decoration-danger="breakdown_priority == 'high'"
+                                            decoration-warning="breakdown_priority == 'medium'"
+                                            decoration-info="breakdown_priority == 'low'"
+                                            width="100"/>
+                                        <field name="team_id" 
+                                            options="{'no_create': True, 'no_open': True}"
+                                            domain="[('company_id', '=', parent.company_id), 
+                                                    ('department_id', '=', parent.department_id)]"
+                                            width="150"/>
+                                        <field name="metric" width="120"/>
+                                        <field name="actual_operator" optional="hide"/>
+                                        <field name="actual_value" width="100"/>
+                                        <field name="target_operator" optional="hide"/>
+                                        <field name="target_value" width="100"/>
+                                        <field name="progress" widget="progressbar" width="150" readonly="1"/>
+                                        <field name="weightage" force_save="1" readonly="1" width="150"/>
+                                        <!-- <field name="result_type" invisible="1" force_save="1"/> -->
+                                    </list>
+                                    <form string="Key Result">
+                                        <sheet>
+                                            <div class="oe_title">
+                                                <label for="key_objective_breakdown"/>
+                                                <h1>
+                                                    <field name="key_objective_breakdown" 
+                                                        placeholder="Key Objective Breakdown"/>
+                                                </h1>
+                                            </div>
+                                            
+                                            <group>
+                                                <group string="Measurement">
+                                                    <field name="team_id" 
+                                                        options="{'no_create': True, 'no_open': True}"
+                                                        domain="[('company_id', '=', parent.company_id), 
+                                                                ('department_id', '=', parent.department_id)]"/>
+                                                    <field name="breakdown_priority" readonly="1"/>
+                                                    <field name="metric" width="120"/>
+                                                    <field name="weightage" force_save="1" readonly="1"/>
+                                                </group>
+                                                <group string="Progress">
+                                                    <field name="target_value"/>
+                                                    <field name="actual_value"/>
+                                                    <field name="progress" widget="percentpie" readonly="1"/>
+                                                    <field name="sequence"/>
+                                                </group>
                                             </group>
-                                            <group string="Progress">
-                                                <field name="progress" widget="percentpie"/>
-                                                <field name="sequence"/>
-                                            </group>
-                                        </group>
 
-                                        <group string="Target Value">
-                                            <group>
-                                                <label for="target_operator" string="Target"/>
-                                                <div class="o_row">
-                                                    <field name="target_operator" class="oe_inline"/>
-                                                    <field name="target_value" class="oe_inline"/>
-                                                    <field name="target_unit" 
-                                                           placeholder="unit (e.g., sales, rejections)" 
-                                                           class="oe_inline"/>
-                                                </div>
+                                            <group string="Target Value">
+                                                <group>
+                                                    <label for="target_operator" string="Target"/>
+                                                    <div class="o_row">
+                                                        <field name="target_operator" class="oe_inline"/>
+                                                        <field name="target_value" class="oe_inline"/>
+                                                        <field name="target_unit" 
+                                                            placeholder="unit (e.g., sales, rejections)" 
+                                                            class="oe_inline"/>
+                                                    </div>
+                                                </group>
+                                                <group>
+                                                    <field name="target_period" 
+                                                        placeholder="e.g., in Q1, per month"/>
+                                                    <field name="target_display" readonly="1"/>
+                                                </group>
                                             </group>
-                                            <group>
-                                                <field name="target_period" 
-                                                       placeholder="e.g., in Q1, per month"/>
-                                                <field name="target_display" readonly="1"/>
-                                            </group>
-                                        </group>
 
-                                        <group string="Actual Value">
-                                            <group>
-                                                <label for="actual_operator" string="Actual"/>
-                                                <div class="o_row">
-                                                    <field name="actual_operator" class="oe_inline"/>
-                                                    <field name="actual_value" class="oe_inline"/>
-                                                    <field name="actual_unit" 
-                                                           placeholder="unit" 
-                                                           class="oe_inline"/>
-                                                </div>
+                                            <group string="Actual Value">
+                                                <group>
+                                                    <label for="actual_operator" string="Actual"/>
+                                                    <div class="o_row">
+                                                        <field name="actual_operator" class="oe_inline"/>
+                                                        <field name="actual_value" class="oe_inline"/>
+                                                        <field name="actual_unit" 
+                                                            placeholder="unit" 
+                                                            class="oe_inline"/>
+                                                    </div>
+                                                </group>
+                                                <group>
+                                                    <field name="actual_period" 
+                                                        placeholder="e.g., in Q1, per month"/>
+                                                    <field name="actual_display" readonly="1"/>
+                                                </group>
                                             </group>
-                                            <group>
-                                                <field name="actual_period" 
-                                                       placeholder="e.g., in Q1, per month"/>
-                                                <field name="actual_display" readonly="1"/>
-                                            </group>
-                                        </group>
-                                    </sheet>
-                                </form>
-                            </field>
-                            
-                            <group class="mt-4">
-                                <group>
-                                    <field name="total_key_result_weightage" 
-                                           string="Total Weightage" 
-                                           readonly="1"
-                                           decoration-danger="total_key_result_weightage != 100"
-                                           decoration-success="total_key_result_weightage == 100"/>
-                                </group>
+                                            <field name="result_type" invisible="1" force_save="1"/>
+                                        </sheet>
+                                    </form>
+                                </field>
                             </group>
+
+                            <!-- Role Weightage Table -->
+                            <group string="Role Weightage" name="role_weightage">
+                                <field name="role_key_result_ids" context="{'weightage_type': 'role'}">
+                                    <list string="Role Key Results" editable="bottom" 
+                                        decoration-success="progress &gt;= 100"
+                                        decoration-info="progress &gt;= 75 and progress &lt; 100"
+                                        decoration-warning="progress &gt;= 50 and progress &lt; 75"
+                                        decoration-danger="progress &lt; 50"
+                                        class="o_key_result_list">
+                                        <!-- Role list fields (same as department) -->
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="key_objective_breakdown"
+                                            options="{'no_create': True, 'no_open': True}"
+                                            width="200"/>
+                                        <field name="breakdown_priority" 
+                                            decoration-danger="breakdown_priority == 'high'"
+                                            decoration-warning="breakdown_priority == 'medium'"
+                                            decoration-info="breakdown_priority == 'low'"
+                                            width="100"/>
+                                        <field name="team_id" 
+                                            options="{'no_create': True, 'no_open': True}"
+                                            domain="[('company_id', '=', parent.company_id), 
+                                                    ('department_id', '=', parent.department_id)]"
+                                            width="150"/>
+                                        <field name="metric" width="120"/>
+                                        <field name="actual_operator" optional="hide"/>
+                                        <field name="actual_value" width="100"/>
+                                        <field name="target_operator" optional="hide"/>
+                                        <field name="target_value" width="100"/>
+                                        <field name="progress" widget="progressbar" width="150" readonly="1"/>
+                                        <field name="weightage" force_save="1" readonly="1" width="100"/>
+                                        <!-- <field name="result_type" invisible="1" force_save="1"/> -->
+                                    </list>
+                                    <!-- Same form view as department -->
+                                    <form string="Key Result">
+                                        <sheet>
+                                            <div class="oe_title">
+                                                <label for="key_objective_breakdown"/>
+                                                <h1>
+                                                    <field name="key_objective_breakdown" 
+                                                        placeholder="Key Objective Breakdown"/>
+                                                </h1>
+                                            </div>
+                                            
+                                            <group>
+                                                <group string="Measurement">
+                                                    <field name="team_id" 
+                                                        options="{'no_create': True, 'no_open': True}"
+                                                        domain="[('company_id', '=', parent.company_id), 
+                                                                ('department_id', '=', parent.department_id)]"/>
+                                                    <field name="breakdown_priority" readonly="1"/>
+                                                    <field name="metric" width="120"/>
+                                                    <field name="weightage" force_save="1" readonly="1"/>
+                                                </group>
+                                                <group string="Progress">
+                                                    <field name="target_value"/>
+                                                    <field name="actual_value"/>
+                                                    <field name="progress" widget="percentpie" readonly="1"/>
+                                                    <field name="sequence"/>
+                                                </group>
+                                            </group>
+
+                                            <group string="Target Value">
+                                                <group>
+                                                    <label for="target_operator" string="Target"/>
+                                                    <div class="o_row">
+                                                        <field name="target_operator" class="oe_inline"/>
+                                                        <field name="target_value" class="oe_inline"/>
+                                                        <field name="target_unit" 
+                                                            placeholder="unit (e.g., sales, rejections)" 
+                                                            class="oe_inline"/>
+                                                    </div>
+                                                </group>
+                                                <group>
+                                                    <field name="target_period" 
+                                                        placeholder="e.g., in Q1, per month"/>
+                                                    <field name="target_display" readonly="1"/>
+                                                </group>
+                                            </group>
+
+                                            <group string="Actual Value">
+                                                <group>
+                                                    <label for="actual_operator" string="Actual"/>
+                                                    <div class="o_row">
+                                                        <field name="actual_operator" class="oe_inline"/>
+                                                        <field name="actual_value" class="oe_inline"/>
+                                                        <field name="actual_unit" 
+                                                            placeholder="unit" 
+                                                            class="oe_inline"/>
+                                                    </div>
+                                                </group>
+                                                <group>
+                                                    <field name="actual_period" 
+                                                        placeholder="e.g., in Q1, per month"/>
+                                                    <field name="actual_display" readonly="1"/>
+                                                </group>
+                                            </group>
+                                            <field name="result_type" invisible="1" force_save="1"/>
+                                        </sheet>
+                                    </form>
+                                </field>
+                            </group>
+
+                            <!-- Common Weightage Table -->
+                            <group string="Common Weightage" name="common_weightage">
+                                <field name="common_key_result_ids" context="{'weightage_type': 'common'}">
+                                    <list string="Common Key Results" editable="bottom" 
+                                        decoration-success="progress &gt;= 100"
+                                        decoration-info="progress &gt;= 75 and progress &lt; 100"
+                                        decoration-warning="progress &gt;= 50 and progress &lt; 75"
+                                        decoration-danger="progress &lt; 50"
+                                        class="o_key_result_list">
+                                        <!-- Common list fields (same as department) -->
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="key_objective_breakdown"
+                                            options="{'no_create': True, 'no_open': True}"
+                                            width="200"/>
+                                        <field name="breakdown_priority" 
+                                            decoration-danger="breakdown_priority == 'high'"
+                                            decoration-warning="breakdown_priority == 'medium'"
+                                            decoration-info="breakdown_priority == 'low'"
+                                            width="100"/>
+                                        <field name="team_id" 
+                                            options="{'no_create': True, 'no_open': True}"
+                                            domain="[('company_id', '=', parent.company_id), 
+                                                    ('department_id', '=', parent.department_id)]"
+                                            width="150"/>
+                                        <field name="metric" width="120"/>
+                                        <field name="actual_operator" optional="hide"/>
+                                        <field name="actual_value" width="100"/>
+                                        <field name="target_operator" optional="hide"/>
+                                        <field name="target_value" width="100"/>
+                                        <field name="progress" widget="progressbar" width="150" readonly="1"/>
+                                        <field name="weightage" force_save="1" readonly="1" width="100"/>
+                                        <!-- <field name="result_type" invisible="1" force_save="1"/> -->
+                                    </list>
+                                    <!-- Same form view as department -->
+                                    <form string="Key Result">
+                                        <sheet>
+                                            <div class="oe_title">
+                                                <label for="key_objective_breakdown"/>
+                                                <h1>
+                                                    <field name="key_objective_breakdown" 
+                                                        placeholder="Key Objective Breakdown"/>
+                                                </h1>
+                                            </div>
+                                            
+                                            <group>
+                                                <group string="Measurement">
+                                                    <field name="team_id" 
+                                                        options="{'no_create': True, 'no_open': True}"
+                                                        domain="[('company_id', '=', parent.company_id), 
+                                                                ('department_id', '=', parent.department_id)]"/>
+                                                    <field name="breakdown_priority" readonly="1"/>
+                                                    <field name="metric" width="120"/>
+                                                    <field name="weightage" force_save="1" readonly="1"/>
+                                                </group>
+                                                <group string="Progress">
+                                                    <field name="target_value"/>
+                                                    <field name="actual_value"/>
+                                                    <field name="progress" widget="percentpie" readonly="1"/>
+                                                    <field name="sequence"/>
+                                                </group>
+                                            </group>
+
+                                            <group string="Target Value">
+                                                <group>
+                                                    <label for="target_operator" string="Target"/>
+                                                    <div class="o_row">
+                                                        <field name="target_operator" class="oe_inline"/>
+                                                        <field name="target_value" class="oe_inline"/>
+                                                        <field name="target_unit" 
+                                                            placeholder="unit (e.g., sales, rejections)" 
+                                                            class="oe_inline"/>
+                                                    </div>
+                                                </group>
+                                                <group>
+                                                    <field name="target_period" 
+                                                        placeholder="e.g., in Q1, per month"/>
+                                                    <field name="target_display" readonly="1"/>
+                                                </group>
+                                            </group>
+
+                                            <group string="Actual Value">
+                                                <group>
+                                                    <label for="actual_operator" string="Actual"/>
+                                                    <div class="o_row">
+                                                        <field name="actual_operator" class="oe_inline"/>
+                                                        <field name="actual_value" class="oe_inline"/>
+                                                        <field name="actual_unit" 
+                                                            placeholder="unit" 
+                                                            class="oe_inline"/>
+                                                    </div>
+                                                </group>
+                                                <group>
+                                                    <field name="actual_period" 
+                                                        placeholder="e.g., in Q1, per month"/>
+                                                    <field name="actual_display" readonly="1"/>
+                                                </group>
+                                            </group>
+                                            <field name="result_type" invisible="1" force_save="1"/>
+                                        </sheet>
+                                    </form>
+                                </field>
+                            </group>
+                            <!-- Keep original field for compatibility but make it invisible -->
+                            <field name="key_result_ids" invisible="1"/>
                         </page>
 
                         <!-- General Info -->
@@ -214,6 +461,46 @@
         </field>
     </record>
 
+    <!-- Form View for Objective Breakdown -->
+    <record id="view_oh_appraisal_objective_breakdown_form" model="ir.ui.view">
+        <field name="name">oh.appraisal.objective.breakdown.form</field>
+        <field name="model">oh.appraisal.objective.breakdown</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="objective_item"/>
+                            <field name="priority"/>
+                            <field name="sequence"/>
+                        </group>
+                        <!-- <group>
+                            <field name="created_by" readonly="1"/>
+                            <field name="created_datetime" readonly="1"/>
+                            <field name="okr_template_id" invisible="1"/>
+                        </group> -->
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- list View with Priority Colors -->
+    <record id="view_oh_appraisal_objective_breakdown_list" model="ir.ui.view">
+        <field name="name">oh.appraisal.objective.breakdown.list</field>
+        <field name="model">oh.appraisal.objective.breakdown</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" decoration-danger="priority == 'high'" decoration-warning="priority == 'medium'" decoration-info="priority == 'low'">
+                <field name="sequence" widget="handle"/>
+                <field name="objective_item"/>
+                <!-- Use default selection rendering (inline dropdown in editable list) -->
+                <field name="priority"/>
+                <!-- <field name="created_by"/> -->
+                <!-- <field name="created_datetime"/> -->
+            </list>
+        </field>
+    </record>
+
     <!-- list View -->
     <record id="oh_appraisal_okr_template_view_list" model="ir.ui.view">
         <field name="name">oh.appraisal.okr.template.list</field>
@@ -224,20 +511,20 @@
                   decoration-muted="active==False">
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
-                <field name="code"/>
+                <field name="goal"/>
                 <field name="objective_title"/>
                 <field name="priority" widget="badge" 
                        decoration-danger="priority=='high'"
                        decoration-warning="priority=='medium'"
                        decoration-success="priority=='low'"/>
                 <field name="department_id"/>
-                <field name="team_id"/>
+                <!-- <field name="team_id"/> -->
                 <field name="start_date"/>
                 <field name="end_date"/>
                 <field name="key_result_count"/>
-                <field name="total_key_result_weightage" 
+                <!-- <field name="total_key_result_weightage" 
                        decoration-danger="total_key_result_weightage != 100"
-                       decoration-success="total_key_result_weightage == 100"/>
+                       decoration-success="total_key_result_weightage == 100"/> -->
                 <field name="company_id" groups="base.group_multi_company"/>
                 <field name="active" invisible="1"/>
             </list>
@@ -251,10 +538,10 @@
         <field name="arch" type="xml">
             <search string="Search OKR Templates">
                 <field name="name"/>
-                <field name="code"/>
+                <field name="goal"/>
                 <field name="objective_title"/>
                 <field name="department_id"/>
-                <field name="team_id"/>
+                <!-- <field name="team_id"/> -->
                 <field name="company_id"/>
                 
                 <filter string="High Priority" name="high_priority" 
@@ -272,8 +559,8 @@
                         domain="[('active','=',False)]"/>
                 
                 <separator/>
-                <filter string="Incomplete Weightage" name="incomplete_weightage"
-                        domain="[('total_key_result_weightage','!=',100)]"/>
+                <!-- <filter string="Incomplete Weightage" name="incomplete_weightage"
+                        domain="[('total_key_result_weightage','!=',100)]"/> -->
                 
                 <group expand="0" string="Group By">
                     <filter string="Priority" name="group_priority" 
@@ -291,6 +578,30 @@
         </field>
     </record>
 
+    <record id="view_oh_appraisal_objective_breakdown_search" model="ir.ui.view">
+        <field name="name">oh.appraisal.objective.breakdown.search</field>
+        <field name="model">oh.appraisal.objective.breakdown</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="objective_item"/>
+                <!-- <field name="created_by"/> -->
+                <separator/>
+                <filter string="High Priority" name="high_priority" 
+                        domain="[('priority', '=', 'high')]"/>
+                <filter string="Medium Priority" name="medium_priority" 
+                        domain="[('priority', '=', 'medium')]"/>
+                <filter string="Low Priority" name="low_priority" 
+                        domain="[('priority', '=', 'low')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Priority" name="group_priority" 
+                            context="{'group_by': 'priority'}"/>
+                    <!-- <filter string="Created By" name="group_created_by" 
+                            context="{'group_by': 'created_by'}"/> -->
+                </group>
+            </search>
+        </field>
+    </record>
+
     <!-- Kanban View -->
     <record id="oh_appraisal_okr_template_view_kanban" model="ir.ui.view">
         <field name="name">oh.appraisal.okr.template.kanban</field>
@@ -302,7 +613,7 @@
                 <field name="priority"/>
                 <field name="department_id"/>
                 <field name="key_result_count"/>
-                <field name="total_key_result_weightage"/>
+                <!-- <field name="total_key_result_weightage"/> -->
                 <templates>
                     <t t-name="card">
                         <div class="oe_kanban_content">

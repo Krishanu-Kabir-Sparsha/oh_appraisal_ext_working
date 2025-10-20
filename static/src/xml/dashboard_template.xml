@@ -61,7 +61,9 @@
                     <div class="item-content">
                         <div class="form-group">
                             <label>Department</label>
-                            <select class="form-control" t-model="state.department.selected">
+                            <select class="form-control" 
+                                    t-model="state.department.selected"
+                                    t-on-change="onDepartmentChange">
                                 <option value="">Select Department</option>
                                 <t t-foreach="state.departments" t-as="dept" t-key="dept.id">
                                     <option t-att-value="dept.id">
@@ -125,27 +127,38 @@
                         </div>
                         <div class="weightage-inputs">
                             <div class="input-group">
-                                <input type="number" class="form-control" t-model="state.weightage.functional" 
-                                       t-on-change="(ev) => this.onWeightageChange('functional', ev.target.value)"/>
+                                <input type="number" class="form-control" 
+                                    t-model="state.weightage.functional" 
+                                    placeholder="Department %"/>
                                 <div class="input-group-append">
                                     <span class="input-group-text">%</span>
                                 </div>
                             </div>
                             <div class="input-group">
-                                <input type="number" class="form-control" t-model="state.weightage.role"
-                                       t-on-change="(ev) => this.onWeightageChange('role', ev.target.value)"/>
+                                <input type="number" class="form-control" 
+                                    t-model="state.weightage.role"
+                                    placeholder="Role %"/>
                                 <div class="input-group-append">
                                     <span class="input-group-text">%</span>
                                 </div>
                             </div>
                             <div class="input-group">
-                                <input type="number" class="form-control" t-model="state.weightage.common"
-                                       t-on-change="(ev) => this.onWeightageChange('common', ev.target.value)"/>
+                                <input type="number" class="form-control" 
+                                    t-model="state.weightage.common"
+                                    placeholder="Common %"/>
                                 <div class="input-group-append">
                                     <span class="input-group-text">%</span>
                                 </div>
                             </div>
                         </div>
+                        <div class="alert alert-info mt-2" role="alert" t-if="!state.department.selected">
+                            Please select a department to configure weightages
+                        </div>
+                        <button class="btn btn-primary btn-block mt-2" 
+                                t-on-click="saveConfiguration"
+                                t-att-disabled="!state.department.selected">
+                            <i class="fa fa-save"/> Save Configuration
+                        </button>
                     </div>
                 </div>
 

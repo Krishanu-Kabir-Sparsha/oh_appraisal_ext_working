@@ -28,9 +28,9 @@ class AppraisalDashboard extends Component {
                 selected: false
             },
             weightage: {
-                functional: 35,
-                role: 45,
-                common: 20
+                functional: '',
+                role: '',
+                common: ''
             },
             framework: {
                 primary: '360-degree',
@@ -137,57 +137,167 @@ class AppraisalDashboard extends Component {
         await this.loadDepartmentsAndJobs();
     }
 
+    // Update the saveConfiguration method:
+    async saveConfiguration() {
+        try {
+            if (!this.state.department.selected) {
+                alert('Please select a department first');
+                return;
+            }
+
+            if (!this.state.master.company) {
+                alert('Please select a company first');
+                return;
+            }
+
+            // Validate weightages
+            const functional = parseFloat(this.state.weightage.functional) || 0;
+            const role = parseFloat(this.state.weightage.role) || 0;
+            const common = parseFloat(this.state.weightage.common) || 0;
+            const total = functional + role + common;
+
+            if (total !== 100) {
+                alert('Total weightage must equal 100%');
+                return;
+            }
+
+            // Save complete configuration
+            const result = await this.orm.call(
+                'oh.appraisal.department.weightage',
+                'save_department_config',
+                [
+                    this.state.department.selected,
+                    this.state.master.company,
+                    {
+                        functional_weightage: functional,
+                        role_weightage: role,
+                        common_weightage: common,
+                        assessment_period: this.state.department.assessment_period,
+                        industry_type: this.state.master.industry
+                    }
+                ]
+            );
+
+            if (result) {
+                // Refresh the configuration after saving
+                await this.loadDepartmentConfig(
+                    this.state.department.selected,
+                    this.state.master.company
+                );
+                alert('Configuration saved successfully!');
+            } else {
+                throw new Error('Failed to save configuration');
+            }
+        } catch (error) {
+            console.error("Error saving configuration:", error);
+            alert('Error saving configuration: ' + (error.message || 'Unknown error'));
+        }
+    }
+
+    // Add method to load existing configuration
+    async loadDepartmentConfig(departmentId, companyId) {
+        if (!departmentId || !companyId) return;
+
+        try {
+            const config = await this.orm.call(
+                'oh.appraisal.department.weightage',
+                'get_department_config',
+                [],
+                {
+                    department_id: departmentId,
+                    company_id: companyId
+                }
+            );
+
+            if (config) {
+                this.state.weightage.functional = config.functional_weightage;
+                this.state.weightage.role = config.role_weightage;
+                this.state.weightage.common = config.common_weightage;
+                this.state.department.assessment_period = config.assessment_period;
+            } else {
+                // Clear weightages if no config exists
+                this.state.weightage.functional = '';
+                this.state.weightage.role = '';
+                this.state.weightage.common = '';
+            }
+        } catch (error) {
+            console.error("Error loading department config:", error);
+        }
+    }
+
     async loadDepartmentsAndJobs(companyId = false) {
         try {
-            const domain = companyId ? [['company_id', '=', companyId]] : [];
+            let departmentDomain = [];
+            let jobDomain = [];
+            
+            if (companyId) {
+                departmentDomain = [['company_id', '=', companyId]];
+                jobDomain = [['company_id', '=', companyId]];
+            }
             
             // Load departments
             const departments = await this.orm.searchRead(
                 'hr.department',
-                domain,
+                departmentDomain,
                 ['id', 'name'],
                 { order: 'name' }
             );
             this.state.departments = departments;
-            console.log("Loaded Departments:", departments);
-
+            
             // Load job positions
             const jobs = await this.orm.searchRead(
                 'hr.job',
-                domain,
+                jobDomain,
                 ['id', 'name'],
                 { order: 'name' }
             );
             this.state.jobPositions = jobs;
-            console.log("Loaded Job Positions:", jobs);
+
         } catch (error) {
             console.error("Error loading departments/jobs:", error);
+            this.state.departments = [];
+            this.state.jobPositions = [];
         }
     }
 
+
+    // Also update the onCompanyChange method to include loadDepartmentConfig:
     async onCompanyChange(ev) {
-        // Handle both event object and direct value
         const companyId = ev?.target ? parseInt(ev.target.value) : parseInt(ev);
-        
-        console.log("Company change triggered with:", companyId);
         
         if (!companyId) {
             this.state.departments = [];
             this.state.jobPositions = [];
             this.state.department.selected = false;
             this.state.role.selected = false;
+            this.state.weightage.functional = '';
+            this.state.weightage.role = '';
+            this.state.weightage.common = '';
             return;
         }
 
-        // Update the state
         this.state.master.company = companyId;
-
-        // Load departments and jobs for selected company
+        
+        // Load departments and jobs
         await this.loadDepartmentsAndJobs(companyId);
-
-        // Reset dependent selections
+        
+        // Reset selections
         this.state.department.selected = false;
         this.state.role.selected = false;
+    }
+
+    // Add a new method to handle department changes
+    async onDepartmentChange(ev) {
+        const departmentId = ev?.target ? parseInt(ev.target.value) : parseInt(ev);
+        this.state.department.selected = departmentId;
+        
+        if (departmentId && this.state.master.company) {
+            await this.loadDepartmentConfig(departmentId, this.state.master.company);
+        } else {
+            this.state.weightage.functional = '';
+            this.state.weightage.role = '';
+            this.state.weightage.common = '';
+        }
     }
 
     async onWeightageChange(type, value) {
@@ -225,6 +335,8 @@ class AppraisalDashboard extends Component {
             console.error("Error running simulation:", error);
         }
     }
+
+
 
     openIndustryTypes() {
         // Open Industry Types configuration in a new action

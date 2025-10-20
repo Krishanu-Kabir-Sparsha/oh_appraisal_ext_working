@@ -32,3 +32,8 @@ access_oh_appraisal_team_manager,oh.appraisal.team.manager,model_oh_appraisal_te
 
 access_oh_appraisal_okr_weightage_user,oh.appraisal.okr.weightage.user,model_oh_appraisal_okr_weightage,oh_appraisal.oh_appraisal_group_employee,1,0,0,0
 access_oh_appraisal_okr_weightage_manager,oh.appraisal.okr.weightage.manager,model_oh_appraisal_okr_weightage,oh_appraisal.oh_appraisal_group_manager,1,1,1,1
+
+access_oh_appraisal_dept_weightage_user,oh.appraisal.department.weightage user,model_oh_appraisal_department_weightage,oh_appraisal.oh_appraisal_group_employee,1,0,0,0
+access_oh_appraisal_dept_weightage_manager,oh.appraisal.department.weightage manager,model_oh_appraisal_department_weightage,oh_appraisal.oh_appraisal_group_manager,1,1,1,1
+
+access_oh_appraisal_objective_breakdown_user,oh.appraisal.objective.breakdown.user,model_oh_appraisal_objective_breakdown,oh_appraisal.oh_appraisal_group_employee,1,1,1,1

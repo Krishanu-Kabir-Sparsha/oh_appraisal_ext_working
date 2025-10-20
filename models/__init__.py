@@ -12,3 +12,4 @@ from . import appraisal_simulation
 from . import team
 from . import okr_template
 from . import okr_weightage
+from . import department_weightage

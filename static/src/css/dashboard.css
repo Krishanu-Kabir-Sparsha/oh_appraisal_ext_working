@@ -174,3 +174,53 @@
     font-weight: 600;
     color: #2b2b2b;
 }
+
+.o_key_result_list {
+    /* Ensure proper table layout */
+    width: 100%;
+    table-layout: fixed;
+}
+
+.o_key_result_list th {
+    /* Header styling */
+    background-color: #f8f9fa;
+    padding: 8px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.o_key_result_list td {
+    /* Cell styling */
+    padding: 8px;
+    vertical-align: middle;
+}
+
+/* Move "Add a line" to the left */
+.o_key_result_list tfoot tr td {
+    text-align: left !important;
+}
+
+/* Improve progress bar appearance */
+.o_key_result_list .o_progressbar {
+    height: 20px;
+    margin: 0;
+}
+
+/* Ensure consistent input field widths */
+.o_key_result_list input {
+    width: 100%;
+    min-width: 60px;
+}
+
+/* Better alignment for numeric fields */
+.o_key_result_list .o_field_number {
+    text-align: right;
+}
+
+/* Improve dropdown fields appearance */
+.o_key_result_list select {
+    width: 100%;
+}
+
