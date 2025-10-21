@@ -84,7 +84,7 @@
                                 <!-- Objective Weightage Section -->
                                 <separator string="Objective Weightage"/>
                                 <group>
-                                    <group string="Department Budget (from Dashboard)">
+                                    <group string="Weightage Distribution">
                                         <label for="department_budget_functional" string="Available Budgets"/>
                                         <div>
                                             <span>Dept: <field name="department_budget_functional" class="oe_inline"/> %</span> |
@@ -135,9 +135,9 @@
                         <!-- Key Results Section -->
                         <page string="🎯 Key Results" name="key_results">
                             <!-- Department Weightage Table -->
-                            <group string="Department Weightage" name="department_weightage">
-                                <field name="department_key_result_ids" context="{'weightage_type': 'department'}">
-                                    <list string="Department Key Results" editable="bottom" 
+                            <group string="Department Key Results &amp; Weightage Distribution" name="department_weightage">
+                                <field name="department_key_result_ids" context="{'weightage_type': 'department'}" nolabel="1">
+                                    <list editable="bottom" 
                                         decoration-success="progress &gt;= 100"
                                         decoration-info="progress &gt;= 75 and progress &lt; 100"
                                         decoration-warning="progress &gt;= 50 and progress &lt; 75"
@@ -147,24 +147,26 @@
                                         <field name="sequence" widget="handle"/>
                                         <field name="key_objective_breakdown"
                                             options="{'no_create': True, 'no_open': True}"
-                                            width="200"/>
+                                            width="150"/>
                                         <field name="breakdown_priority" 
                                             decoration-danger="breakdown_priority == 'high'"
                                             decoration-warning="breakdown_priority == 'medium'"
                                             decoration-info="breakdown_priority == 'low'"
-                                            width="100"/>
+                                            width="80"/>
                                         <field name="team_id" 
                                             options="{'no_create': True, 'no_open': True}"
                                             domain="[('company_id', '=', parent.company_id), 
                                                     ('department_id', '=', parent.department_id)]"
-                                            width="150"/>
-                                        <field name="metric" width="120"/>
+                                            width="70"/>
+                                        <field name="metric" width="70"/>
                                         <field name="actual_operator" optional="hide"/>
                                         <field name="actual_value" width="100"/>
                                         <field name="target_operator" optional="hide"/>
                                         <field name="target_value" width="100"/>
-                                        <field name="progress" widget="progressbar" width="150" readonly="1"/>
-                                        <field name="weightage" force_save="1" readonly="1" width="150"/>
+                                        <field name="progress" widget="progressbar" width="130" readonly="1"/>
+                                        <field name="available_weightage" readonly="1" width="150"/>
+                                        <field name="distributed_weightage" width="150"/>
+                                        <!-- <field name="remaining_weightage" readonly="1" width="100"/> -->
                                         <!-- <field name="result_type" invisible="1" force_save="1"/> -->
                                     </list>
                                     <form string="Key Result">
@@ -185,7 +187,9 @@
                                                                 ('department_id', '=', parent.department_id)]"/>
                                                     <field name="breakdown_priority" readonly="1"/>
                                                     <field name="metric" width="120"/>
-                                                    <field name="weightage" force_save="1" readonly="1"/>
+                                                    <field name="available_weightage" readonly="1"/>
+                                                    <field name="distributed_weightage"/>
+                                                    <!-- <field name="remaining_weightage" readonly="1"/> -->
                                                 </group>
                                                 <group string="Progress">
                                                     <field name="target_value"/>
@@ -237,19 +241,20 @@
                             </group>
 
                             <!-- Role Weightage Table -->
-                            <group string="Role Weightage" name="role_weightage">
-                                <field name="role_key_result_ids" context="{'weightage_type': 'role'}">
-                                    <list string="Role Key Results" editable="bottom" 
+                            <group string="Role Key Results &amp; Weightage Distribution" name="role_weightage">
+                                <field name="role_key_result_ids" context="{'weightage_type': 'role'}" nolabel="1">
+                                    <list editable="bottom" 
                                         decoration-success="progress &gt;= 100"
                                         decoration-info="progress &gt;= 75 and progress &lt; 100"
                                         decoration-warning="progress &gt;= 50 and progress &lt; 75"
                                         decoration-danger="progress &lt; 50"
-                                        class="o_key_result_list">
+                                        class="o_key_result_list"
+                                        >
                                         <!-- Role list fields (same as department) -->
                                         <field name="sequence" widget="handle"/>
                                         <field name="key_objective_breakdown"
                                             options="{'no_create': True, 'no_open': True}"
-                                            width="200"/>
+                                            width="250"/>
                                         <field name="breakdown_priority" 
                                             decoration-danger="breakdown_priority == 'high'"
                                             decoration-warning="breakdown_priority == 'medium'"
@@ -259,14 +264,16 @@
                                             options="{'no_create': True, 'no_open': True}"
                                             domain="[('company_id', '=', parent.company_id), 
                                                     ('department_id', '=', parent.department_id)]"
-                                            width="150"/>
+                                            width="120"/>
                                         <field name="metric" width="120"/>
                                         <field name="actual_operator" optional="hide"/>
                                         <field name="actual_value" width="100"/>
                                         <field name="target_operator" optional="hide"/>
                                         <field name="target_value" width="100"/>
                                         <field name="progress" widget="progressbar" width="150" readonly="1"/>
-                                        <field name="weightage" force_save="1" readonly="1" width="100"/>
+                                        <field name="available_weightage" readonly="1" width="100"/>
+                                        <field name="distributed_weightage" width="100"/>
+                                        <!-- <field name="remaining_weightage" readonly="1" width="100"/> -->
                                         <!-- <field name="result_type" invisible="1" force_save="1"/> -->
                                     </list>
                                     <!-- Same form view as department -->
@@ -288,7 +295,9 @@
                                                                 ('department_id', '=', parent.department_id)]"/>
                                                     <field name="breakdown_priority" readonly="1"/>
                                                     <field name="metric" width="120"/>
-                                                    <field name="weightage" force_save="1" readonly="1"/>
+                                                    <field name="available_weightage" readonly="1"/>
+                                                    <field name="distributed_weightage"/>
+                                                    <!-- <field name="remaining_weightage" readonly="1"/> -->
                                                 </group>
                                                 <group string="Progress">
                                                     <field name="target_value"/>
@@ -340,19 +349,20 @@
                             </group>
 
                             <!-- Common Weightage Table -->
-                            <group string="Common Weightage" name="common_weightage">
-                                <field name="common_key_result_ids" context="{'weightage_type': 'common'}">
-                                    <list string="Common Key Results" editable="bottom" 
+                            <group string="Common Key Results &amp; Weightage Distribution" name="common_weightage">
+                                <field name="common_key_result_ids" context="{'weightage_type': 'common'}" nolabel="1">
+                                    <list editable="bottom" 
                                         decoration-success="progress &gt;= 100"
                                         decoration-info="progress &gt;= 75 and progress &lt; 100"
                                         decoration-warning="progress &gt;= 50 and progress &lt; 75"
                                         decoration-danger="progress &lt; 50"
-                                        class="o_key_result_list">
+                                        class="o_key_result_list"
+                                        >
                                         <!-- Common list fields (same as department) -->
                                         <field name="sequence" widget="handle"/>
                                         <field name="key_objective_breakdown"
                                             options="{'no_create': True, 'no_open': True}"
-                                            width="200"/>
+                                            width="250"/>
                                         <field name="breakdown_priority" 
                                             decoration-danger="breakdown_priority == 'high'"
                                             decoration-warning="breakdown_priority == 'medium'"
@@ -362,14 +372,16 @@
                                             options="{'no_create': True, 'no_open': True}"
                                             domain="[('company_id', '=', parent.company_id), 
                                                     ('department_id', '=', parent.department_id)]"
-                                            width="150"/>
+                                            width="120"/>
                                         <field name="metric" width="120"/>
                                         <field name="actual_operator" optional="hide"/>
                                         <field name="actual_value" width="100"/>
                                         <field name="target_operator" optional="hide"/>
                                         <field name="target_value" width="100"/>
-                                        <field name="progress" widget="progressbar" width="150" readonly="1"/>
-                                        <field name="weightage" force_save="1" readonly="1" width="100"/>
+                                        <field name="available_weightage" readonly="1" width="100"/>
+                                        <field name="distributed_weightage" width="100"/>
+                                        <!-- <field name="remaining_weightage" readonly="1" width="100"/> -->
+                                        
                                         <!-- <field name="result_type" invisible="1" force_save="1"/> -->
                                     </list>
                                     <!-- Same form view as department -->
@@ -391,7 +403,9 @@
                                                                 ('department_id', '=', parent.department_id)]"/>
                                                     <field name="breakdown_priority" readonly="1"/>
                                                     <field name="metric" width="120"/>
-                                                    <field name="weightage" force_save="1" readonly="1"/>
+                                                    <field name="available_weightage" readonly="1"/>
+                                                    <field name="distributed_weightage"/>
+                                                    <!-- <field name="remaining_weightage" readonly="1"/> -->
                                                 </group>
                                                 <group string="Progress">
                                                     <field name="target_value"/>

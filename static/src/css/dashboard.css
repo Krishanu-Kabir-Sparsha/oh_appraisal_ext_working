@@ -182,20 +182,16 @@
 }
 
 .o_key_result_list th {
-    /* Header styling */
-    background-color: #f8f9fa;
-    padding: 8px;
-    text-align: left;
+    padding: 8px !important;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .o_key_result_list td {
-    /* Cell styling */
-    padding: 8px;
-    vertical-align: middle;
+    padding: 8px !important;
 }
+
 
 /* Move "Add a line" to the left */
 .o_key_result_list tfoot tr td {

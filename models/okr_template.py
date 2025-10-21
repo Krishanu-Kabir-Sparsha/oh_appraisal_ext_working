@@ -88,7 +88,6 @@ class OHAppraisalOKRTemplate(models.Model):
     department_key_result_ids = fields.One2many(
         'oh.appraisal.okr.key.result',
         'okr_template_id',
-        string='Department Key Results',
         domain=[('result_type', '=', 'department')],
         context={'weightage_type': 'department', 'default_result_type': 'department'}
     )
@@ -96,7 +95,6 @@ class OHAppraisalOKRTemplate(models.Model):
     role_key_result_ids = fields.One2many(
         'oh.appraisal.okr.key.result',
         'okr_template_id',
-        string='Role Key Results',
         domain=[('result_type', '=', 'role')],
         context={'weightage_type': 'role', 'default_result_type': 'role'}
     )
@@ -104,7 +102,6 @@ class OHAppraisalOKRTemplate(models.Model):
     common_key_result_ids = fields.One2many(
         'oh.appraisal.okr.key.result',
         'okr_template_id',
-        string='Common Key Results',
         domain=[('result_type', '=', 'common')],
         context={'weightage_type': 'common', 'default_result_type': 'common'}
     )
@@ -555,13 +552,16 @@ class OHAppraisalOKRTemplate(models.Model):
         for record in self:
             # First redistribute common weightage
             record._redistribute_common_weightage()
-            # Then trigger recompute of key results
+            # Then trigger recompute of available weightages
             if record.department_key_result_ids:
-                record.department_key_result_ids._compute_weightage()
+                for kr in record.department_key_result_ids:
+                    kr._compute_available_weightage()
             if record.role_key_result_ids:
-                record.role_key_result_ids._compute_weightage()
+                for kr in record.role_key_result_ids:
+                    kr._compute_available_weightage()
             if record.common_key_result_ids:
-                record.common_key_result_ids._compute_weightage()
+                for kr in record.common_key_result_ids:
+                    kr._compute_available_weightage()
 
     # def write(self, vals):
     #     """Override write to handle weightage updates"""
@@ -604,7 +604,17 @@ class OHAppraisalOKRTemplate(models.Model):
         res = super().write(vals)
         if 'weightage_ids' in vals:
             self._redistribute_common_weightage()
-            self.mapped('key_result_ids')._compute_weightage()
+            # Update available weightages for all key results
+            for record in self:
+                if record.department_key_result_ids:
+                    for kr in record.department_key_result_ids:
+                        kr._compute_available_weightage()
+                if record.role_key_result_ids:
+                    for kr in record.role_key_result_ids:
+                        kr._compute_available_weightage()
+                if record.common_key_result_ids:
+                    for kr in record.common_key_result_ids:
+                        kr._compute_available_weightage()
         return res
 
 
@@ -700,13 +710,31 @@ class OHAppraisalOKRKeyResult(models.Model):
                           store=True,
                           help="Auto-calculated progress: (Actual / Target) * 100")
     
-    # Update weightage field to be computed
-    weightage = fields.Float('Weightage (%)', 
-                           digits=(5, 2),
-                           compute='_compute_weightage',
-                           store=True,
-                           help="Weightage automatically set from team's weightage")
-    
+    # Replace the weightage field with these new fields
+    available_weightage = fields.Float(
+        'Available Weightage (%)', 
+        compute='_compute_available_weightage',
+        store=True,
+        digits=(5, 2),
+        help="Available weightage budget for the selected team"
+    )
+
+    distributed_weightage = fields.Float(
+        'Distributed Weightage (%)',
+        digits=(5, 2),
+        default=0.0,
+        help="Weightage allocated to this objective breakdown"
+    )
+
+    remaining_weightage = fields.Float(
+        'Remaining Weightage (%)',
+        compute='_compute_remaining_weightage',
+        store=True,
+        digits=(5, 2),
+        help="Remaining weightage available for distribution"
+    )
+
+
     # data_source = fields.Selection([
     #     ('manual', 'Manual Entry'),
     #     ('jira', 'Jira'),
@@ -748,46 +776,137 @@ class OHAppraisalOKRKeyResult(models.Model):
     @api.depends('team_id', 'okr_template_id.weightage_ids', 
                 'okr_template_id.weightage_ids.department_weightage',
                 'okr_template_id.weightage_ids.role_weightage',
-                'okr_template_id.weightage_ids.common_weightage')
-    def _compute_weightage(self):
-        """Compute weightage based on selected team and context"""
+                'okr_template_id.weightage_ids.common_weightage',
+                'result_type')
+    def _compute_available_weightage(self):
+        """Compute total available weightage for the selected team"""
         for record in self:
             if record.team_id and record.okr_template_id:
                 weightage_record = record.okr_template_id.weightage_ids.filtered(
                     lambda w: w.team_id == record.team_id
                 )
                 if weightage_record:
-                    # Determine which weightage to use based on the context
-                    if self.env.context.get('weightage_type') == 'role':
-                        record.weightage = weightage_record[0].role_weightage
-                    elif self.env.context.get('weightage_type') == 'common':
-                        record.weightage = weightage_record[0].common_weightage
-                    else:  # default to department weightage
-                        record.weightage = weightage_record[0].department_weightage
+                    if record.result_type == 'role':
+                        record.available_weightage = weightage_record[0].role_weightage
+                    elif record.result_type == 'common':
+                        record.available_weightage = weightage_record[0].common_weightage
+                    else:  # department
+                        record.available_weightage = weightage_record[0].department_weightage
                 else:
-                    record.weightage = 0.0
+                    record.available_weightage = 0.0
             else:
-                record.weightage = 0.0
+                record.available_weightage = 0.0
+
+    @api.depends('team_id', 'available_weightage', 'distributed_weightage',
+                'okr_template_id.department_key_result_ids.distributed_weightage',
+                'okr_template_id.role_key_result_ids.distributed_weightage',
+                'okr_template_id.common_key_result_ids.distributed_weightage')
+    def _compute_remaining_weightage(self):
+        """Compute remaining weightage available for distribution"""
+        for record in self:
+            if record.team_id and record.available_weightage > 0:
+                # Get all records for this team and type
+                domain = [
+                    ('okr_template_id', '=', record.okr_template_id.id),
+                    ('team_id', '=', record.team_id.id),
+                    ('result_type', '=', record.result_type),
+                    ('id', '!=', record._origin.id)  # Exclude current record
+                ]
+                related_records = self.search(domain)
+                total_distributed = sum(related_records.mapped('distributed_weightage'))
+                record.remaining_weightage = max(0, record.available_weightage - total_distributed)
+            else:
+                record.remaining_weightage = 0.0
+
+    @api.constrains('distributed_weightage', 'team_id')
+    def _check_distributed_weightage(self):
+        """Validate weightage distribution"""
+        for record in self:
+            if record.distributed_weightage < 0:
+                raise ValidationError(_("Distributed weightage cannot be negative."))
+            
+            if record.team_id and record.distributed_weightage > 0:
+                domain = [
+                    ('okr_template_id', '=', record.okr_template_id.id),
+                    ('team_id', '=', record.team_id.id),
+                    ('result_type', '=', record.result_type)
+                ]
+                related_records = self.search(domain)
+                total_distributed = sum(related_records.mapped('distributed_weightage'))
+                
+                if total_distributed > record.available_weightage:
+                    raise ValidationError(_(
+                        "Total distributed weightage (%.2f%%) exceeds available weightage (%.2f%%) for team %s"
+                    ) % (total_distributed, record.available_weightage, record.team_id.name))
+
+    
+    @api.constrains('distributed_weightage', 'team_id', 'result_type')
+    def _check_total_distributed_weightage(self):
+        """Ensure total distributed weightage doesn't exceed available budget"""
+        for record in self:
+            if record.team_id and record.distributed_weightage > 0:
+                domain = [
+                    ('okr_template_id', '=', record.okr_template_id.id),
+                    ('team_id', '=', record.team_id.id),
+                    ('result_type', '=', record.result_type)
+                ]
+                all_records = self.search(domain)
+                total_distributed = sum(all_records.mapped('distributed_weightage'))
+                
+                if total_distributed > record.available_weightage:
+                    raise ValidationError(_(
+                        "Total distributed weightage (%.2f%%) for %s objectives cannot exceed "
+                        "the available weightage (%.2f%%) for team %s"
+                    ) % (
+                        total_distributed,
+                        dict(self._fields['result_type'].selection).get(record.result_type),
+                        record.available_weightage,
+                        record.team_id.name
+                    ))
+
+
+    @api.onchange('distributed_weightage')
+    def _onchange_distributed_weightage(self):
+        """Show warning when approaching available weightage limit"""
+        if self.team_id and self.distributed_weightage > 0:
+            domain = [
+                ('okr_template_id', '=', self.okr_template_id.id),
+                ('team_id', '=', self.team_id.id),
+                ('result_type', '=', self.result_type),
+                ('id', '!=', self._origin.id)
+            ]
+            other_records = self.search(domain)
+            total_distributed = sum(other_records.mapped('distributed_weightage')) + self.distributed_weightage
+            
+            if total_distributed > self.available_weightage:
+                excess = total_distributed - self.available_weightage
+                return {
+                    'warning': {
+                        'title': _('Weightage Distribution Warning'),
+                        'message': _(
+                            "Current distribution exceeds available weightage by %.2f%%.\n"
+                            "Available: %.2f%%\n"
+                            "Total Distributed: %.2f%%"
+                        ) % (excess, self.available_weightage, total_distributed)
+                    }
+                }
 
     @api.onchange('team_id')
     def _onchange_team_id(self):
-        """Update weightage when team changes"""
+        """Reset distributed weightage when team changes"""
+        self.distributed_weightage = 0.0
+        # Update available weightage
         if self.team_id and self.okr_template_id:
             weightage_record = self.okr_template_id.weightage_ids.filtered(
                 lambda w: w.team_id == self.team_id
             )
             if weightage_record:
-                # Determine which weightage to use based on the context
-                if self.env.context.get('weightage_type') == 'role':
-                    self.weightage = weightage_record[0].role_weightage
-                elif self.env.context.get('weightage_type') == 'common':
-                    self.weightage = weightage_record[0].common_weightage
-                else:  # default to department weightage
-                    self.weightage = weightage_record[0].department_weightage
-            else:
-                self.weightage = 0.0
-        else:
-            self.weightage = 0.0
+                if self.result_type == 'role':
+                    self.available_weightage = weightage_record[0].role_weightage
+                elif self.result_type == 'common':
+                    self.available_weightage = weightage_record[0].common_weightage
+                else:  # department
+                    self.available_weightage = weightage_record[0].department_weightage
 
 
     @api.depends('actual_value', 'target_value')
@@ -878,11 +997,6 @@ class OHAppraisalOKRKeyResult(models.Model):
                 parts.append(record.actual_period)
             record.actual_display = ' '.join(parts)
 
-    @api.constrains('weightage')
-    def _check_weightage(self):
-        for record in self:
-            if record.weightage < 0 or record.weightage > 100:
-                raise ValidationError(_("Weightage must be between 0 and 100."))
             
 
     
