@@ -23,12 +23,53 @@ class OHAppraisalOKRTemplate(models.Model):
     description = fields.Html('Description')
     
     # Objective Section
-    objective_title = fields.Char('Objective Title', required=False, tracking=True)
+    objective_title_department = fields.Char(
+        'Department Objective', 
+        tracking=True,
+        help="Department specific objective"
+    )
+    objective_breakdown_department_ids = fields.One2many(
+        'oh.appraisal.objective.breakdown',
+        'okr_template_id',
+        string='Department Objective Breakdowns',
+        domain=[('breakdown_type', '=', 'department')],
+        context={'default_breakdown_type': 'department'}
+    )
+
+    objective_title_role = fields.Char(
+        'Role Objective', 
+        tracking=True,
+        help="Role specific objective"
+    )
+    objective_breakdown_role_ids = fields.One2many(
+        'oh.appraisal.objective.breakdown',
+        'okr_template_id',
+        string='Role Objective Breakdowns',
+        domain=[('breakdown_type', '=', 'role')],
+        context={'default_breakdown_type': 'role'}
+    )
+
+    objective_title_common = fields.Char(
+        'Common Objective', 
+        tracking=True,
+        help="Common objective"
+    )
+    objective_breakdown_common_ids = fields.One2many(
+        'oh.appraisal.objective.breakdown',
+        'okr_template_id',
+        string='Common Objective Breakdowns',
+        domain=[('breakdown_type', '=', 'common')],
+        context={'default_breakdown_type': 'common'}
+    )
+
+    # Keep original fields for backward compatibility
+    objective_title = fields.Char('Legacy Objective Title', tracking=True)
     objective_breakdown_ids = fields.One2many(
         'oh.appraisal.objective.breakdown',
         'okr_template_id',
-        string='Objective Breakdowns'
+        string='Legacy Objective Breakdowns'
     )
+
     priority = fields.Selection([
         ('high', 'High'),
         ('medium', 'Medium'),
@@ -119,6 +160,76 @@ class OHAppraisalOKRTemplate(models.Model):
     #                                         store=True)
     key_result_count = fields.Integer('Key Results Count', 
                                     compute='_compute_key_result_count')
+
+    
+    department_distributed_total = fields.Float(
+        compute='_compute_distributed_totals',
+        store=True,
+        digits=(5, 2)
+    )
+    role_distributed_total = fields.Float(
+        compute='_compute_distributed_totals',
+        store=True,
+        digits=(5, 2)
+    )
+    common_distributed_total = fields.Float(
+        compute='_compute_distributed_totals',
+        store=True,
+        digits=(5, 2)
+    )
+
+    selected_teams_display = fields.Char(
+        string='Selected Teams',
+        compute='_compute_selected_teams_display',
+        store=True,
+        help="Teams selected in objective weightage"
+    )
+
+    @api.depends('weightage_ids', 'weightage_ids.team_id')
+    def _compute_selected_teams_display(self):
+        """Compute display string for selected teams"""
+        for record in self:
+            teams = record.weightage_ids.mapped('team_id')
+            if teams:
+                record.selected_teams_display = ', '.join(teams.mapped('name'))
+            else:
+                record.selected_teams_display = ''
+    
+    @api.depends('department_key_result_ids.distributed_weightage',
+                'role_key_result_ids.distributed_weightage',
+                'common_key_result_ids.distributed_weightage')
+    def _compute_distributed_totals(self):
+        for record in self:
+            record.department_distributed_total = sum(
+                record.department_key_result_ids.mapped('distributed_weightage')
+            )
+            record.role_distributed_total = sum(
+                record.role_key_result_ids.mapped('distributed_weightage')
+            )
+            record.common_distributed_total = sum(
+                record.common_key_result_ids.mapped('distributed_weightage')
+            )
+
+    @api.constrains('department_distributed_total', 'role_distributed_total', 'common_distributed_total')
+    def _check_distributed_totals(self):
+        for record in self:
+            if record.department_distributed_total > record.department_budget_functional:
+                raise ValidationError(_(
+                    "Total distributed department weightage (%.2f%%) cannot exceed "
+                    "available budget (%.2f%%)"
+                ) % (record.department_distributed_total, record.department_budget_functional))
+            
+            if record.role_distributed_total > record.department_budget_role:
+                raise ValidationError(_(
+                    "Total distributed role weightage (%.2f%%) cannot exceed "
+                    "available budget (%.2f%%)"
+                ) % (record.role_distributed_total, record.department_budget_role))
+            
+            if record.common_distributed_total > record.department_budget_common:
+                raise ValidationError(_(
+                    "Total distributed common weightage (%.2f%%) cannot exceed "
+                    "available budget (%.2f%%)"
+                ) % (record.common_distributed_total, record.department_budget_common))
 
     @api.depends('department_id', 'company_id')
     def _compute_department_budget(self):
@@ -660,7 +771,7 @@ class OHAppraisalOKRKeyResult(models.Model):
         'oh.appraisal.objective.breakdown',
         string='Objective Breakdown',
         required=True,
-        domain="[('okr_template_id', '=', okr_template_id)]"
+        domain="[('okr_template_id', '=', okr_template_id), ('breakdown_type', '=', result_type)]"
     )
 
     breakdown_priority = fields.Selection(
@@ -726,13 +837,13 @@ class OHAppraisalOKRKeyResult(models.Model):
         help="Weightage allocated to this objective breakdown"
     )
 
-    remaining_weightage = fields.Float(
-        'Remaining Weightage (%)',
-        compute='_compute_remaining_weightage',
-        store=True,
-        digits=(5, 2),
-        help="Remaining weightage available for distribution"
-    )
+    # remaining_weightage = fields.Float(
+    #     'Remaining Weightage (%)',
+    #     compute='_compute_remaining_weightage',
+    #     store=True,
+    #     digits=(5, 2),
+    #     help="Remaining weightage available for distribution"
+    # )
 
 
     # data_source = fields.Selection([
@@ -774,26 +885,34 @@ class OHAppraisalOKRKeyResult(models.Model):
         return {'domain': {'team_id': []}}
 
     @api.depends('team_id', 'okr_template_id.weightage_ids', 
-                'okr_template_id.weightage_ids.department_weightage',
-                'okr_template_id.weightage_ids.role_weightage',
-                'okr_template_id.weightage_ids.common_weightage',
-                'result_type')
+            'okr_template_id.allocated_functional',
+            'okr_template_id.allocated_role',
+            'okr_template_id.allocated_common',
+            'result_type')
     def _compute_available_weightage(self):
-        """Compute total available weightage for the selected team"""
+        """Compute available weightage based on allocated weightages"""
         for record in self:
             if record.team_id and record.okr_template_id:
-                weightage_record = record.okr_template_id.weightage_ids.filtered(
-                    lambda w: w.team_id == record.team_id
-                )
-                if weightage_record:
-                    if record.result_type == 'role':
-                        record.available_weightage = weightage_record[0].role_weightage
-                    elif record.result_type == 'common':
-                        record.available_weightage = weightage_record[0].common_weightage
-                    else:  # department
-                        record.available_weightage = weightage_record[0].department_weightage
-                else:
-                    record.available_weightage = 0.0
+                # Get allocated weightage based on type
+                if record.result_type == 'role':
+                    total_available = record.okr_template_id.allocated_role
+                elif record.result_type == 'common':
+                    total_available = record.okr_template_id.allocated_common
+                else:  # department
+                    total_available = record.okr_template_id.allocated_functional
+
+                # Get already distributed amount for this team
+                domain = [
+                    ('okr_template_id', '=', record.okr_template_id.id),
+                    ('team_id', '=', record.team_id.id),
+                    ('result_type', '=', record.result_type),
+                    ('id', '!=', record.id)
+                ]
+                other_records = self.search(domain)
+                total_distributed = sum(other_records.mapped('distributed_weightage'))
+                
+                # Set available as remaining amount
+                record.available_weightage = max(0, total_available - total_distributed)
             else:
                 record.available_weightage = 0.0
 
@@ -818,31 +937,45 @@ class OHAppraisalOKRKeyResult(models.Model):
             else:
                 record.remaining_weightage = 0.0
 
-    @api.constrains('distributed_weightage', 'team_id')
+    @api.constrains('distributed_weightage', 'team_id', 'result_type')
     def _check_distributed_weightage(self):
-        """Validate weightage distribution"""
+        """Validate distributed weightage against allocated budget"""
         for record in self:
             if record.distributed_weightage < 0:
                 raise ValidationError(_("Distributed weightage cannot be negative."))
             
             if record.team_id and record.distributed_weightage > 0:
+                # Get all records for this team and type
                 domain = [
                     ('okr_template_id', '=', record.okr_template_id.id),
                     ('team_id', '=', record.team_id.id),
                     ('result_type', '=', record.result_type)
                 ]
-                related_records = self.search(domain)
-                total_distributed = sum(related_records.mapped('distributed_weightage'))
+                all_records = self.search(domain)
+                total_distributed = sum(all_records.mapped('distributed_weightage'))
                 
-                if total_distributed > record.available_weightage:
+                # Get allocated budget based on type
+                if record.result_type == 'role':
+                    allocated_budget = record.okr_template_id.allocated_role
+                elif record.result_type == 'common':
+                    allocated_budget = record.okr_template_id.allocated_common
+                else:  # department
+                    allocated_budget = record.okr_template_id.allocated_functional
+                
+                if total_distributed > allocated_budget:
                     raise ValidationError(_(
-                        "Total distributed weightage (%.2f%%) exceeds available weightage (%.2f%%) for team %s"
-                    ) % (total_distributed, record.available_weightage, record.team_id.name))
+                        "Total distributed weightage (%.2f%%) for %s objectives cannot exceed "
+                        "the allocated weightage (%.2f%%)"
+                    ) % (
+                        total_distributed,
+                        dict(record._fields['result_type'].selection).get(record.result_type),
+                        allocated_budget
+                    ))
 
     
     @api.constrains('distributed_weightage', 'team_id', 'result_type')
     def _check_total_distributed_weightage(self):
-        """Ensure total distributed weightage doesn't exceed available budget"""
+        """Ensure total distributed weightage doesn't exceed allocated budget"""
         for record in self:
             if record.team_id and record.distributed_weightage > 0:
                 domain = [
@@ -853,22 +986,30 @@ class OHAppraisalOKRKeyResult(models.Model):
                 all_records = self.search(domain)
                 total_distributed = sum(all_records.mapped('distributed_weightage'))
                 
-                if total_distributed > record.available_weightage:
+                # Get allocated budget based on type
+                if record.result_type == 'role':
+                    allocated_budget = record.okr_template_id.allocated_role
+                elif record.result_type == 'common':
+                    allocated_budget = record.okr_template_id.allocated_common
+                else:  # department
+                    allocated_budget = record.okr_template_id.allocated_functional
+                
+                if total_distributed > allocated_budget:
                     raise ValidationError(_(
                         "Total distributed weightage (%.2f%%) for %s objectives cannot exceed "
-                        "the available weightage (%.2f%%) for team %s"
+                        "the allocated weightage (%.2f%%)"
                     ) % (
                         total_distributed,
-                        dict(self._fields['result_type'].selection).get(record.result_type),
-                        record.available_weightage,
-                        record.team_id.name
+                        dict(record._fields['result_type'].selection).get(record.result_type),
+                        allocated_budget
                     ))
 
 
     @api.onchange('distributed_weightage')
     def _onchange_distributed_weightage(self):
-        """Show warning when approaching available weightage limit"""
+        """Show warning when approaching allocated budget"""
         if self.team_id and self.distributed_weightage > 0:
+            # Get total distributed for this team and type
             domain = [
                 ('okr_template_id', '=', self.okr_template_id.id),
                 ('team_id', '=', self.team_id.id),
@@ -878,16 +1019,21 @@ class OHAppraisalOKRKeyResult(models.Model):
             other_records = self.search(domain)
             total_distributed = sum(other_records.mapped('distributed_weightage')) + self.distributed_weightage
             
-            if total_distributed > self.available_weightage:
-                excess = total_distributed - self.available_weightage
+            # Get allocated budget based on type
+            if self.result_type == 'role':
+                allocated_budget = self.okr_template_id.allocated_role
+            elif self.result_type == 'common':
+                allocated_budget = self.okr_template_id.allocated_common
+            else:  # department
+                allocated_budget = self.okr_template_id.allocated_functional
+            
+            if total_distributed > allocated_budget:
                 return {
                     'warning': {
                         'title': _('Weightage Distribution Warning'),
                         'message': _(
-                            "Current distribution exceeds available weightage by %.2f%%.\n"
-                            "Available: %.2f%%\n"
-                            "Total Distributed: %.2f%%"
-                        ) % (excess, self.available_weightage, total_distributed)
+                            "Total distributed weightage (%.2f%%) exceeds allocated budget (%.2f%%)"
+                        ) % (total_distributed, allocated_budget)
                     }
                 }
 
@@ -997,14 +1143,47 @@ class OHAppraisalOKRKeyResult(models.Model):
                 parts.append(record.actual_period)
             record.actual_display = ' '.join(parts)
 
+    @api.onchange('okr_template_id', 'result_type')
+    def _onchange_template_and_type(self):
+        """Update domain for key_objective_breakdown when template or type changes"""
+        self.key_objective_breakdown = False  # Clear existing selection
+        if self.okr_template_id and self.result_type:
+            return {
+                'domain': {
+                    'key_objective_breakdown': [
+                        ('okr_template_id', '=', self.okr_template_id.id),
+                        ('breakdown_type', '=', self.result_type)
+                    ]
+                }
+            }
+        return {'domain': {'key_objective_breakdown': []}}
             
 
+    @api.constrains('key_objective_breakdown', 'result_type')
+    def _check_breakdown_type_match(self):
+        """Ensure breakdown type matches the result type"""
+        for record in self:
+            if record.key_objective_breakdown and record.key_objective_breakdown.breakdown_type != record.result_type:
+                raise ValidationError(_(
+                    "Selected objective breakdown type (%s) does not match the key result type (%s)"
+                ) % (
+                    dict(record.key_objective_breakdown._fields['breakdown_type'].selection).get(
+                        record.key_objective_breakdown.breakdown_type
+                    ),
+                    dict(record._fields['result_type'].selection).get(record.result_type)
+                ))
     
 class OHAppraisalObjectiveBreakdown(models.Model):
     _name = 'oh.appraisal.objective.breakdown'
     _description = 'Objective Breakdown Items'
     _order = 'sequence, id'
     _rec_name = 'objective_item'
+
+    breakdown_type = fields.Selection([
+        ('department', 'Department'),
+        ('role', 'Role'),
+        ('common', 'Common')
+    ], string='Breakdown Type', required=True, default='department')
 
     sequence = fields.Integer('Sequence', default=10)
     okr_template_id = fields.Many2one('oh.appraisal.okr.template', 
@@ -1028,3 +1207,12 @@ class OHAppraisalObjectiveBreakdown(models.Model):
     # created_datetime = fields.Datetime('Created On',
     #                                  readonly=True,
     #                                  default=lambda self: fields.Datetime.now())
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Set breakdown type from context if not specified"""
+        for vals in vals_list:
+            if not vals.get('breakdown_type'):
+                if self.env.context.get('default_breakdown_type'):
+                    vals['breakdown_type'] = self.env.context['default_breakdown_type']
+        return super().create(vals_list)

@@ -36,23 +36,8 @@
                             <field name="department_id" 
                                             options="{'no_create': True, 'no_open': True}" 
                                             context="{'default_company_id': company_id}"/>
-                        </group>
-                        <group>
-                            <field name="start_date"/>
-                            <field name="end_date"/>
-                        </group>
-                    </group>
-
-                    <notebook>
-                        <!-- Objective Section -->
-                        <page string="📋 Objective" name="objective">
-                            <group>
-                                <group string="Team Objective Details">
-                                    <field name="objective_title" 
-                                           placeholder="Enter the main objective"/>
-                                    <!-- <field name="priority"/> -->
-                                    
-                                    <label for="team_id" string="Team"/>
+                        
+                            <label for="team_id" string="Team"/>
                                     <div class="o_row">
                                         <field name="team_id" 
                                             options="{'no_create': true, 'no_open': true}"
@@ -70,22 +55,63 @@
                                         Create / Configure Teams from the configure button. 
                                         Teams are linked to Departments and help in allocating weightages effectively from the down below ↓. 
                                     </div>
-                                    
-                                    <!-- <field name="objective_weightage"/> -->
-                                </group>
-                                <group string="Team Objective Breakdown">
-                                    <field name="objective_breakdown_ids">
+                        </group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <!-- Objective Section -->
+                        <page string="📋 Objective" name="objective">
+                            <group>
+                                <!-- Department Objective -->
+                                <group string="Department Objective Details">
+                                    <field name="objective_title_department" 
+                                        placeholder="Enter the department objective"/>
+                                    <field name="objective_breakdown_department_ids">
                                         <list editable="bottom">
+                                            <field name="sequence" widget="handle"/>
                                             <field name="objective_item" placeholder="Enter objective item..."/>
                                             <field name="priority"/>
+                                            <!-- <field name="breakdown_type" invisible="1"/> -->
+                                        </list>
+                                    </field>
+                                </group>
+
+                                <!-- Role Objective -->
+                                <group string="Role Objective Details">
+                                    <field name="objective_title_role" 
+                                        placeholder="Enter the role objective"/>
+                                    <field name="objective_breakdown_role_ids">
+                                        <list editable="bottom">
+                                            <field name="sequence" widget="handle"/>
+                                            <field name="objective_item" placeholder="Enter objective item..."/>
+                                            <field name="priority"/>
+                                            <!-- <field name="breakdown_type" invisible="1"/> -->
+                                        </list>
+                                    </field>
+                                </group>
+
+                                <!-- Common Objective -->
+                                <group string="Common Objective Details">
+                                    <field name="objective_title_common" 
+                                        placeholder="Enter the common objective"/>
+                                    <field name="objective_breakdown_common_ids">
+                                        <list editable="bottom">
+                                            <field name="sequence" widget="handle"/>
+                                            <field name="objective_item" placeholder="Enter objective item..."/>
+                                            <field name="priority"/>
+                                            <!-- <field name="breakdown_type" invisible="1"/> -->
                                         </list>
                                     </field>
                                 </group>
                                 <!-- Objective Weightage Section -->
                                 <separator string="Objective Weightage"/>
                                 <group>
-                                    <group string="Weightage Distribution">
-                                        <label for="department_budget_functional" string="Available Budgets"/>
+                                    <group string="Weightage Distributed">
+                                        <label for="department_budget_functional" string="Available Weightage"/>
                                         <div>
                                             <span>Dept: <field name="department_budget_functional" class="oe_inline"/> %</span> |
                                             <span>Role: <field name="department_budget_role" class="oe_inline"/> %</span> |
@@ -136,6 +162,23 @@
                         <page string="🎯 Key Results" name="key_results">
                             <!-- Department Weightage Table -->
                             <group string="Department Key Results &amp; Weightage Distribution" name="department_weightage">
+                                
+                                <group>
+                                    <group string="Weightage Distributed from Objective Weightage">
+                                        <label for="team_id" string="Available Weightage"/>
+                                        <div>
+                                            <field name="allocated_functional" readonly="1" class="oe_inline"/> %
+                                        </div>
+                                    </group>
+                                    <group string="Currently Distributed">
+                                        <label for="team_id" string="Total Distributed"/>
+                                        <div>
+                                            <field name="department_distributed_total" readonly="1" class="oe_inline"
+                                                decoration-danger="department_distributed_total &gt; allocated_functional"
+                                                decoration-success="department_distributed_total &lt;= allocated_functional"/> %
+                                        </div>
+                                    </group>
+                                </group>
                                 <field name="department_key_result_ids" context="{'weightage_type': 'department'}" nolabel="1">
                                     <list editable="bottom" 
                                         decoration-success="progress &gt;= 100"
@@ -145,9 +188,10 @@
                                         class="o_key_result_list">
                                         <!-- Department list fields -->
                                         <field name="sequence" widget="handle"/>
-                                        <field name="key_objective_breakdown"
-                                            options="{'no_create': True, 'no_open': True}"
-                                            width="150"/>
+                                       <field name="key_objective_breakdown"
+                                                options="{'no_create': True, 'no_open': True}"
+                                                domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', 'department')]"
+                                                width="150"/>
                                         <field name="breakdown_priority" 
                                             decoration-danger="breakdown_priority == 'high'"
                                             decoration-warning="breakdown_priority == 'medium'"
@@ -164,8 +208,8 @@
                                         <field name="target_operator" optional="hide"/>
                                         <field name="target_value" width="100"/>
                                         <field name="progress" widget="progressbar" width="130" readonly="1"/>
-                                        <field name="available_weightage" readonly="1" width="150"/>
-                                        <field name="distributed_weightage" width="150"/>
+                                        <field name="distributed_weightage" sum="Total Distributed %"/>
+                                        <!-- <field name="available_weightage" readonly="1"/> -->
                                         <!-- <field name="remaining_weightage" readonly="1" width="100"/> -->
                                         <!-- <field name="result_type" invisible="1" force_save="1"/> -->
                                     </list>
@@ -175,7 +219,9 @@
                                                 <label for="key_objective_breakdown"/>
                                                 <h1>
                                                     <field name="key_objective_breakdown" 
-                                                        placeholder="Key Objective Breakdown"/>
+                                                            options="{'no_create': True, 'no_open': True}"
+                                                            domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', result_type)]"
+                                                            placeholder="Select Objective Breakdown"/>
                                                 </h1>
                                             </div>
                                             
@@ -242,6 +288,23 @@
 
                             <!-- Role Weightage Table -->
                             <group string="Role Key Results &amp; Weightage Distribution" name="role_weightage">
+                                <group>
+                                    <group string="Weightage Distributed from Objective Weightage">
+                                        <label for="team_id" string="Available Weightage"/>
+                                        <div>
+                                            <field name="allocated_role" readonly="1" class="oe_inline"/> %
+                                        </div>
+                                    </group>
+                                    <group string="Currently Distributed">
+                                        <label for="team_id" string="Total Distributed"/>
+                                        <div>
+                                            <field name="role_distributed_total" readonly="1" class="oe_inline"
+                                                decoration-danger="role_distributed_total &gt; allocated_role"
+                                                decoration-success="role_distributed_total &lt;= allocated_role"/> %
+                                        </div>
+                                    </group>
+                                </group>
+                                
                                 <field name="role_key_result_ids" context="{'weightage_type': 'role'}" nolabel="1">
                                     <list editable="bottom" 
                                         decoration-success="progress &gt;= 100"
@@ -253,8 +316,9 @@
                                         <!-- Role list fields (same as department) -->
                                         <field name="sequence" widget="handle"/>
                                         <field name="key_objective_breakdown"
-                                            options="{'no_create': True, 'no_open': True}"
-                                            width="250"/>
+                                                options="{'no_create': True, 'no_open': True}"
+                                                domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', 'role')]"
+                                                width="150"/>
                                         <field name="breakdown_priority" 
                                             decoration-danger="breakdown_priority == 'high'"
                                             decoration-warning="breakdown_priority == 'medium'"
@@ -271,8 +335,8 @@
                                         <field name="target_operator" optional="hide"/>
                                         <field name="target_value" width="100"/>
                                         <field name="progress" widget="progressbar" width="150" readonly="1"/>
-                                        <field name="available_weightage" readonly="1" width="100"/>
-                                        <field name="distributed_weightage" width="100"/>
+                                        <field name="distributed_weightage" sum="Total Distributed %"/>
+                                        <!-- <field name="available_weightage" readonly="1"/> -->
                                         <!-- <field name="remaining_weightage" readonly="1" width="100"/> -->
                                         <!-- <field name="result_type" invisible="1" force_save="1"/> -->
                                     </list>
@@ -283,7 +347,9 @@
                                                 <label for="key_objective_breakdown"/>
                                                 <h1>
                                                     <field name="key_objective_breakdown" 
-                                                        placeholder="Key Objective Breakdown"/>
+                                                            options="{'no_create': True, 'no_open': True}"
+                                                            domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', result_type)]"
+                                                            placeholder="Select Objective Breakdown"/>
                                                 </h1>
                                             </div>
                                             
@@ -350,6 +416,23 @@
 
                             <!-- Common Weightage Table -->
                             <group string="Common Key Results &amp; Weightage Distribution" name="common_weightage">
+                                <group>
+                                    <group string="Weightage Distributed from Objective Weightage">
+                                        <label for="team_id" string="Available Weightage"/>
+                                        <div>
+                                            <field name="allocated_common" readonly="1" class="oe_inline"/> %
+                                        </div>
+                                    </group>
+                                    <group string="Currently Distributed">
+                                        <label for="team_id" string="Total Distributed"/>
+                                        <div>
+                                            <field name="common_distributed_total" readonly="1" class="oe_inline"
+                                                decoration-danger="common_distributed_total &gt; allocated_common"
+                                                decoration-success="common_distributed_total &lt;= allocated_common"/> %
+                                        </div>
+                                    </group>
+                                </group>
+                                
                                 <field name="common_key_result_ids" context="{'weightage_type': 'common'}" nolabel="1">
                                     <list editable="bottom" 
                                         decoration-success="progress &gt;= 100"
@@ -361,8 +444,9 @@
                                         <!-- Common list fields (same as department) -->
                                         <field name="sequence" widget="handle"/>
                                         <field name="key_objective_breakdown"
-                                            options="{'no_create': True, 'no_open': True}"
-                                            width="250"/>
+                                                options="{'no_create': True, 'no_open': True}"
+                                                domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', 'common')]"
+                                                width="150"/>
                                         <field name="breakdown_priority" 
                                             decoration-danger="breakdown_priority == 'high'"
                                             decoration-warning="breakdown_priority == 'medium'"
@@ -378,8 +462,9 @@
                                         <field name="actual_value" width="100"/>
                                         <field name="target_operator" optional="hide"/>
                                         <field name="target_value" width="100"/>
-                                        <field name="available_weightage" readonly="1" width="100"/>
-                                        <field name="distributed_weightage" width="100"/>
+                                        <field name="progress" widget="progressbar" width="150" readonly="1"/>
+                                        <field name="distributed_weightage" sum="Total Distributed %"/>
+                                        <!-- <field name="available_weightage" readonly="1"/> -->
                                         <!-- <field name="remaining_weightage" readonly="1" width="100"/> -->
                                         
                                         <!-- <field name="result_type" invisible="1" force_save="1"/> -->
@@ -391,7 +476,9 @@
                                                 <label for="key_objective_breakdown"/>
                                                 <h1>
                                                     <field name="key_objective_breakdown" 
-                                                        placeholder="Key Objective Breakdown"/>
+                                                            options="{'no_create': True, 'no_open': True}"
+                                                            domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', result_type)]"
+                                                            placeholder="Select Objective Breakdown"/>
                                                 </h1>
                                             </div>
                                             
@@ -526,16 +613,17 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="goal"/>
-                <field name="objective_title"/>
+                <!-- <field name="objective_title"/> -->
                 <field name="priority" widget="badge" 
                        decoration-danger="priority=='high'"
                        decoration-warning="priority=='medium'"
                        decoration-success="priority=='low'"/>
                 <field name="department_id"/>
+                 <field name="selected_teams_display" string="Team"/> 
                 <!-- <field name="team_id"/> -->
                 <field name="start_date"/>
                 <field name="end_date"/>
-                <field name="key_result_count"/>
+                <!-- <field name="key_result_count"/> -->
                 <!-- <field name="total_key_result_weightage" 
                        decoration-danger="total_key_result_weightage != 100"
                        decoration-success="total_key_result_weightage == 100"/> -->
@@ -553,7 +641,7 @@
             <search string="Search OKR Templates">
                 <field name="name"/>
                 <field name="goal"/>
-                <field name="objective_title"/>
+                <!-- <field name="objective_title"/> -->
                 <field name="department_id"/>
                 <!-- <field name="team_id"/> -->
                 <field name="company_id"/>
@@ -623,10 +711,10 @@
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile">
                 <field name="name"/>
-                <field name="objective_title"/>
+                <!-- <field name="objective_title"/> -->
                 <field name="priority"/>
                 <field name="department_id"/>
-                <field name="key_result_count"/>
+                <!-- <field name="key_result_count"/> -->
                 <!-- <field name="total_key_result_weightage"/> -->
                 <templates>
                     <t t-name="card">
@@ -635,7 +723,7 @@
                                 <field name="name"/>
                             </div>
                             <div class="o_kanban_record_subtitle">
-                                <field name="objective_title"/>
+                                <!-- <field name="objective_title"/> -->
                             </div>
                             <div class="o_kanban_record_bottom">
                                 <div class="oe_kanban_bottom_left">
