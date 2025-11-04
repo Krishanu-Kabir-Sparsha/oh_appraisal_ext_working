@@ -36,7 +36,19 @@
                             <field name="department_id" 
                                             options="{'no_create': True, 'no_open': True}" 
                                             context="{'default_company_id': company_id}"/>
-                        
+                            <button name="action_open_master_template" 
+                                    type="object"
+                                    class="btn btn-link p-0 ml-2"
+                                    invisible="not department_id">
+                                <i class="fa fa-external-link" title="View Department Weightage"/>
+                            </button>
+                            
+                        </group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                        <group>
                             <label for="team_id" string="Team"/>
                                     <div class="o_row">
                                         <field name="team_id" 
@@ -56,10 +68,6 @@
                                         Teams are linked to Departments and help in allocating weightages effectively from the down below ↓. 
                                     </div>
                         </group>
-                        <group>
-                            <field name="start_date"/>
-                            <field name="end_date"/>
-                        </group>
                     </group>
 
                     <notebook>
@@ -73,7 +81,7 @@
                                     <field name="objective_breakdown_department_ids">
                                         <list editable="bottom">
                                             <field name="sequence" widget="handle"/>
-                                            <field name="objective_item" placeholder="Enter objective item..."/>
+                                            <field name="objective_item" placeholder="Enter objective parameters..."/>
                                             <field name="priority"/>
                                             <!-- <field name="breakdown_type" invisible="1"/> -->
                                         </list>
@@ -87,7 +95,7 @@
                                     <field name="objective_breakdown_role_ids">
                                         <list editable="bottom">
                                             <field name="sequence" widget="handle"/>
-                                            <field name="objective_item" placeholder="Enter objective item..."/>
+                                            <field name="objective_item" placeholder="Enter objective parameters..."/>
                                             <field name="priority"/>
                                             <!-- <field name="breakdown_type" invisible="1"/> -->
                                         </list>
@@ -101,7 +109,7 @@
                                     <field name="objective_breakdown_common_ids">
                                         <list editable="bottom">
                                             <field name="sequence" widget="handle"/>
-                                            <field name="objective_item" placeholder="Enter objective item..."/>
+                                            <field name="objective_item" placeholder="Enter objective parameters..."/>
                                             <field name="priority"/>
                                             <!-- <field name="breakdown_type" invisible="1"/> -->
                                         </list>

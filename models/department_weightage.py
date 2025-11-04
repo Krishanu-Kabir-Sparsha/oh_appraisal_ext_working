@@ -93,23 +93,19 @@ class OHAppraisalDepartmentWeightage(models.Model):
 
     @api.model
     def get_department_config(self, department_id, company_id):
-        """Get complete configuration for a department"""
-        try:
-            config = self.search([
-                ('department_id', '=', department_id),
-                ('company_id', '=', company_id),
-                ('active', '=', True)
-            ], limit=1)
-            
-            if config:
-                return {
-                    'functional_weightage': config.functional_weightage,
-                    'role_weightage': config.role_weightage,
-                    'common_weightage': config.common_weightage,
-                    'assessment_period': config.assessment_period,
-                    'industry_type': config.industry_type.id if config.industry_type else False
-                }
-            return False
-        except Exception as e:
-            _logger.error("Error getting department config: %s", str(e))
-            return False
+        """Get weightage configuration for a department"""
+        config = self.search([
+            ('department_id', '=', department_id),
+            ('company_id', '=', company_id),
+            ('active', '=', True)
+        ], limit=1)
+        
+        if config:
+            return {
+                'functional_weightage': float(config.functional_weightage or 0.0),
+                'role_weightage': float(config.role_weightage or 0.0),
+                'common_weightage': float(config.common_weightage or 0.0),
+                'assessment_period': config.assessment_period or 'annual',
+            }
+        return False
+        

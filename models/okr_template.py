@@ -185,6 +185,45 @@ class OHAppraisalOKRTemplate(models.Model):
         help="Teams selected in objective weightage"
     )
 
+    _sql_constraints = [
+        ('unique_name_per_department',
+         'unique(name, department_id)',
+         'Template name must be unique per department!')
+    ]
+
+    @api.constrains('name', 'department_id')
+    def _check_unique_name_per_department(self):
+        for record in self:
+            if record.name and record.department_id:
+                domain = [
+                    ('name', '=', record.name),
+                    ('department_id', '=', record.department_id.id),
+                    ('id', '!=', record.id)
+                ]
+                if self.search_count(domain):
+                    raise ValidationError(_(
+                        'A template with the name "%s" already exists for department "%s"'
+                    ) % (record.name, record.department_id.name))
+    
+    def action_open_master_template(self):
+        """Opens Master Template dashboard with department pre-selected"""
+        self.ensure_one()
+        
+        if not self.department_id:
+            return False
+
+        # Return the dashboard action with department context
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'oh_appraisal_dashboard',
+            'name': f'Department Weightage - {self.department_id.name}',
+            'context': {
+                'default_department_id': self.department_id.id,
+                'default_company_id': self.company_id.id,
+            },
+            'target': 'current',
+        }
+
     @api.depends('weightage_ids', 'weightage_ids.team_id')
     def _compute_selected_teams_display(self):
         """Compute display string for selected teams"""
@@ -1190,9 +1229,9 @@ class OHAppraisalObjectiveBreakdown(models.Model):
                                      string='OKR Template',
                                      required=True, 
                                      ondelete='cascade')
-    objective_item = fields.Char('Objective Item', 
+    objective_item = fields.Char('Objective Parameter', 
                                 required=True,
-                                help="Individual objective breakdown item")
+                                help="Individual objective breakdown parameter")
     priority = fields.Selection([
         ('high', 'High'),
         ('medium', 'Medium'),

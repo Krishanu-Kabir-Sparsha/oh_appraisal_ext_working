@@ -2,7 +2,7 @@
 <odoo>
     <!-- Configuration Menu -->
     <menuitem id="menu_oh_appraisal_configuration"
-              name="Configuration"
+              name="Assessment Framework Templates"
               parent="oh_appraisal.hr_appraisal_menu_root"
               sequence="100"
               groups="oh_appraisal.oh_appraisal_group_manager"/>
@@ -16,7 +16,7 @@
     
     <!-- Assessment Framework Template (OKR) -->
     <menuitem id="menu_oh_appraisal_okr_template"
-              name="Assessment Framework Template"
+              name="OKR Template"
               parent="menu_oh_appraisal_configuration"
               action="action_oh_appraisal_okr_template"
               sequence="20"/>
