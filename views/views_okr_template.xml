@@ -83,7 +83,6 @@
                                             <field name="sequence" widget="handle"/>
                                             <field name="objective_item" placeholder="Enter objective parameters..."/>
                                             <field name="priority"/>
-                                            <!-- <field name="breakdown_type" invisible="1"/> -->
                                         </list>
                                     </field>
                                 </group>
@@ -97,7 +96,6 @@
                                             <field name="sequence" widget="handle"/>
                                             <field name="objective_item" placeholder="Enter objective parameters..."/>
                                             <field name="priority"/>
-                                            <!-- <field name="breakdown_type" invisible="1"/> -->
                                         </list>
                                     </field>
                                 </group>
@@ -111,7 +109,6 @@
                                             <field name="sequence" widget="handle"/>
                                             <field name="objective_item" placeholder="Enter objective parameters..."/>
                                             <field name="priority"/>
-                                            <!-- <field name="breakdown_type" invisible="1"/> -->
                                         </list>
                                     </field>
                                 </group>
@@ -160,7 +157,6 @@
                                                 readonly="1"
                                                 decoration-danger="common_weightage > 0 and parent.allocated_common > parent.department_budget_common"
                                                 width="150"/>
-                                            <!-- <field name="company_id" invisible="1"/> -->
                                         </list>
                                     </field>
                             </group>
@@ -187,368 +183,365 @@
                                         </div>
                                     </group>
                                 </group>
-                                <field name="department_key_result_ids" context="{'weightage_type': 'department'}" nolabel="1">
-                                    <list editable="bottom" 
-                                        decoration-success="progress &gt;= 100"
-                                        decoration-info="progress &gt;= 75 and progress &lt; 100"
-                                        decoration-warning="progress &gt;= 50 and progress &lt; 75"
-                                        decoration-danger="progress &lt; 50"
-                                        class="o_key_result_list">
-                                        <!-- Department list fields -->
-                                        <field name="sequence" widget="handle"/>
-                                       <field name="key_objective_breakdown"
+                                    <!-- DEPARTMENT KEY RESULTS LIST VIEW -->
+                                    <field name="department_key_result_ids" context="{'weightage_type': 'department'}" nolabel="1">
+                                        <list editable="bottom" class="o_key_result_list">
+                                            <!-- Department list fields -->
+                                            <field name="sequence" widget="handle"/>
+                                            <field name="key_objective_breakdown"
+                                                    options="{'no_create': True, 'no_open': True}"
+                                                    domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', 'department')]"
+                                                    width="150"/>
+                                            <field name="breakdown_priority" 
+                                                decoration-danger="breakdown_priority == 'high'"
+                                                decoration-warning="breakdown_priority == 'medium'"
+                                                decoration-info="breakdown_priority == 'low'"
+                                                width="80"/>
+                                            <field name="team_id" 
                                                 options="{'no_create': True, 'no_open': True}"
-                                                domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', 'department')]"
-                                                width="150"/>
-                                        <field name="breakdown_priority" 
-                                            decoration-danger="breakdown_priority == 'high'"
-                                            decoration-warning="breakdown_priority == 'medium'"
-                                            decoration-info="breakdown_priority == 'low'"
-                                            width="80"/>
-                                        <field name="team_id" 
-                                            options="{'no_create': True, 'no_open': True}"
-                                            domain="[('company_id', '=', parent.company_id), 
-                                                    ('department_id', '=', parent.department_id)]"
-                                            width="70"/>
-                                        <field name="metric" width="70"/>
-                                        <field name="actual_operator" optional="hide"/>
-                                        <field name="actual_value" width="100"/>
-                                        <field name="target_operator" optional="hide"/>
-                                        <field name="target_value" width="100"/>
-                                        <field name="progress" widget="progressbar" width="130" readonly="1"/>
-                                        <field name="distributed_weightage" sum="Total Distributed %"/>
-                                        <!-- <field name="available_weightage" readonly="1"/> -->
-                                        <!-- <field name="remaining_weightage" readonly="1" width="100"/> -->
-                                        <!-- <field name="result_type" invisible="1" force_save="1"/> -->
-                                    </list>
-                                    <form string="Key Result">
-                                        <sheet>
-                                            <div class="oe_title">
-                                                <label for="key_objective_breakdown"/>
-                                                <h1>
-                                                    <field name="key_objective_breakdown" 
+                                                domain="[('company_id', '=', parent.company_id), 
+                                                        ('department_id', '=', parent.department_id)]"
+                                                width="70"
+                                                help="Select the team responsible for this key result"/>
+                                            <field name="metric" 
+                                                options="{'no_open': True}"
+                                                width="120"/>
+                                            <field name="actual_operator" optional="hide"/>
+                                            <field name="actual_value" width="100"/>
+                                            <field name="target_operator" optional="hide"/>
+                                            <field name="target_value" width="100"/>
+                                            <field name="achieve" 
+                                                readonly="0"
+                                                width="100"
+                                                help="Achievement status or assessment"/>
+                                            <field name="distributed_weightage" sum="Total Distributed %"/>
+                                        </list>
+                                        <form string="Key Result">
+                                            <sheet>
+                                                <div class="oe_title">
+                                                    <label for="key_objective_breakdown"/>
+                                                    <h1>
+                                                        <field name="key_objective_breakdown" 
+                                                                options="{'no_create': True, 'no_open': True}"
+                                                                domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', result_type)]"
+                                                                placeholder="Select Objective Breakdown"/>
+                                                    </h1>
+                                                </div>
+                                                
+                                                <group>
+                                                    <group string="Measurement Configuration">
+                                                        <field name="team_id" 
                                                             options="{'no_create': True, 'no_open': True}"
-                                                            domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', result_type)]"
-                                                            placeholder="Select Objective Breakdown"/>
-                                                </h1>
-                                            </div>
-                                            
-                                            <group>
-                                                <group string="Measurement">
-                                                    <field name="team_id" 
-                                                        options="{'no_create': True, 'no_open': True}"
-                                                        domain="[('company_id', '=', parent.company_id), 
-                                                                ('department_id', '=', parent.department_id)]"/>
-                                                    <field name="breakdown_priority" readonly="1"/>
-                                                    <field name="metric" width="120"/>
-                                                    <field name="available_weightage" readonly="1"/>
-                                                    <field name="distributed_weightage"/>
-                                                    <!-- <field name="remaining_weightage" readonly="1"/> -->
+                                                            domain="[('company_id', '=', parent.company_id), 
+                                                                    ('department_id', '=', parent.department_id)]"/>
+                                                        <field name="breakdown_priority" readonly="1"/>
+                                                        <field name="metric" 
+                                                            options="{'no_open': True}"
+                                                            help="Type of measurement:\n• Percentage: For percentage-based metrics\n• Count: For numeric quantities\n• Rating: For scale-based ratings\n• Score: For points-based scoring"/>
+                                                        <field name="available_weightage" readonly="1"/>
+                                                        <field name="distributed_weightage"/>
+                                                    </group>
+                                                    <group string="Achievement">
+                                                        <field name="achieve" 
+                                                            help="Achievement status or assessment (To be configured)"
+                                                            placeholder="Enter achievement details"/>
+                                                        <field name="sequence"/>
+                                                    </group>
                                                 </group>
-                                                <group string="Progress">
-                                                    <field name="target_value"/>
-                                                    <field name="actual_value"/>
-                                                    <field name="progress" widget="percentpie" readonly="1"/>
-                                                    <field name="sequence"/>
-                                                </group>
-                                            </group>
 
-                                            <group string="Target Value">
-                                                <group>
-                                                    <label for="target_operator" string="Target"/>
-                                                    <div class="o_row">
-                                                        <field name="target_operator" class="oe_inline"/>
-                                                        <field name="target_value" class="oe_inline"/>
-                                                        <field name="target_unit" 
-                                                            placeholder="unit (e.g., sales, rejections)" 
-                                                            class="oe_inline"/>
-                                                    </div>
+                                                <group string="Target Value Configuration">
+                                                    <group string="Target Specification">
+                                                        <label for="target_operator" string="Target Criteria"/>
+                                                        <div class="o_row">
+                                                            <field name="target_operator" 
+                                                                class="oe_inline"
+                                                                help="Comparison operator (=, ≠, &gt;, &lt;, ≥, ≤)"/>
+                                                            <field name="target_value" 
+                                                                class="oe_inline"
+                                                                help="Target numeric value to achieve"/>
+                                                            <field name="target_unit" 
+                                                                placeholder="Unit (e.g., units, %, hours)" 
+                                                                class="oe_inline"
+                                                                help="Unit of measurement"/>
+                                                        </div>
+                                                    </group>
+                                                    <group>
+                                                        <field name="target_period" 
+                                                            placeholder="Time period (e.g., Q1, monthly)"
+                                                            help="Period for target achievement"/>
+                                                        <field name="target_display" readonly="1"
+                                                            help="Formatted target display"/>
+                                                    </group>
                                                 </group>
-                                                <group>
-                                                    <field name="target_period" 
-                                                        placeholder="e.g., in Q1, per month"/>
-                                                    <field name="target_display" readonly="1"/>
-                                                </group>
-                                            </group>
 
-                                            <group string="Actual Value">
-                                                <group>
-                                                    <label for="actual_operator" string="Actual"/>
-                                                    <div class="o_row">
-                                                        <field name="actual_operator" class="oe_inline"/>
-                                                        <field name="actual_value" class="oe_inline"/>
-                                                        <field name="actual_unit" 
-                                                            placeholder="unit" 
-                                                            class="oe_inline"/>
-                                                    </div>
+                                                <group string="Actual Value Configuration">
+                                                    <group string="Actual Achievement">
+                                                        <label for="actual_operator" string="Actual Criteria"/>
+                                                        <div class="o_row">
+                                                            <field name="actual_operator" 
+                                                                class="oe_inline"
+                                                                help="Comparison operator for actual value"/>
+                                                            <field name="actual_value" 
+                                                                class="oe_inline"
+                                                                help="Actual numeric value achieved/measured"/>
+                                                            <field name="actual_unit" 
+                                                                placeholder="Unit" 
+                                                                class="oe_inline"
+                                                                help="Unit of actual measurement"/>
+                                                        </div>
+                                                    </group>
+                                                    <group>
+                                                        <field name="actual_period" 
+                                                            placeholder="Time period"
+                                                            help="Period of actual measurement"/>
+                                                        <field name="actual_display" readonly="1"
+                                                            help="Formatted actual value display"/>
+                                                    </group>
                                                 </group>
-                                                <group>
-                                                    <field name="actual_period" 
-                                                        placeholder="e.g., in Q1, per month"/>
-                                                    <field name="actual_display" readonly="1"/>
-                                                </group>
-                                            </group>
-                                            <field name="result_type" invisible="1" force_save="1"/>
-                                        </sheet>
-                                    </form>
-                                </field>
-                            </group>
+                                                <field name="result_type" invisible="1" force_save="1"/>
+                                            </sheet>
+                                        </form>
+                                    </field>
 
-                            <!-- Role Weightage Table -->
-                            <group string="Role Key Results &amp; Weightage Distribution" name="role_weightage">
-                                <group>
-                                    <group string="Weightage Distributed from Objective Weightage">
-                                        <label for="team_id" string="Available Weightage"/>
-                                        <div>
-                                            <field name="allocated_role" readonly="1" class="oe_inline"/> %
-                                        </div>
-                                    </group>
-                                    <group string="Currently Distributed">
-                                        <label for="team_id" string="Total Distributed"/>
-                                        <div>
-                                            <field name="role_distributed_total" readonly="1" class="oe_inline"
-                                                decoration-danger="role_distributed_total &gt; allocated_role"
-                                                decoration-success="role_distributed_total &lt;= allocated_role"/> %
-                                        </div>
-                                    </group>
-                                </group>
-                                
-                                <field name="role_key_result_ids" context="{'weightage_type': 'role'}" nolabel="1">
-                                    <list editable="bottom" 
-                                        decoration-success="progress &gt;= 100"
-                                        decoration-info="progress &gt;= 75 and progress &lt; 100"
-                                        decoration-warning="progress &gt;= 50 and progress &lt; 75"
-                                        decoration-danger="progress &lt; 50"
-                                        class="o_key_result_list"
-                                        >
-                                        <!-- Role list fields (same as department) -->
-                                        <field name="sequence" widget="handle"/>
-                                        <field name="key_objective_breakdown"
+                                    <!-- ROLE KEY RESULTS LIST VIEW -->
+                                    <field name="role_key_result_ids" context="{'weightage_type': 'role'}" nolabel="1">
+                                        <list editable="bottom" class="o_key_result_list">
+                                            <!-- Role list fields -->
+                                            <field name="sequence" widget="handle"/>
+                                            <field name="key_objective_breakdown"
+                                                    options="{'no_create': True, 'no_open': True}"
+                                                    domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', 'role')]"
+                                                    width="150"/>
+                                            <field name="breakdown_priority" 
+                                                decoration-danger="breakdown_priority == 'high'"
+                                                decoration-warning="breakdown_priority == 'medium'"
+                                                decoration-info="breakdown_priority == 'low'"
+                                                width="100"/>
+                                            <field name="team_id" 
                                                 options="{'no_create': True, 'no_open': True}"
-                                                domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', 'role')]"
-                                                width="150"/>
-                                        <field name="breakdown_priority" 
-                                            decoration-danger="breakdown_priority == 'high'"
-                                            decoration-warning="breakdown_priority == 'medium'"
-                                            decoration-info="breakdown_priority == 'low'"
-                                            width="100"/>
-                                        <field name="team_id" 
-                                            options="{'no_create': True, 'no_open': True}"
-                                            domain="[('company_id', '=', parent.company_id), 
-                                                    ('department_id', '=', parent.department_id)]"
-                                            width="120"/>
-                                        <field name="metric" width="120"/>
-                                        <field name="actual_operator" optional="hide"/>
-                                        <field name="actual_value" width="100"/>
-                                        <field name="target_operator" optional="hide"/>
-                                        <field name="target_value" width="100"/>
-                                        <field name="progress" widget="progressbar" width="150" readonly="1"/>
-                                        <field name="distributed_weightage" sum="Total Distributed %"/>
-                                        <!-- <field name="available_weightage" readonly="1"/> -->
-                                        <!-- <field name="remaining_weightage" readonly="1" width="100"/> -->
-                                        <!-- <field name="result_type" invisible="1" force_save="1"/> -->
-                                    </list>
-                                    <!-- Same form view as department -->
-                                    <form string="Key Result">
-                                        <sheet>
-                                            <div class="oe_title">
-                                                <label for="key_objective_breakdown"/>
-                                                <h1>
-                                                    <field name="key_objective_breakdown" 
+                                                domain="[('company_id', '=', parent.company_id), 
+                                                        ('department_id', '=', parent.department_id)]"
+                                                width="120"/>
+                                            <field name="metric" 
+                                                options="{'no_open': True}"
+                                                width="120"/>
+                                            <field name="actual_operator" optional="hide"/>
+                                            <field name="actual_value" width="100"/>
+                                            <field name="target_operator" optional="hide"/>
+                                            <field name="target_value" width="100"/>
+                                            <field name="achieve" 
+                                                readonly="0"
+                                                width="100"
+                                                help="Achievement status or assessment"/>
+                                            <field name="distributed_weightage" sum="Total Distributed %"/>
+                                        </list>
+                                        <!-- Same form view as department -->
+                                        <form string="Key Result">
+                                            <sheet>
+                                                <div class="oe_title">
+                                                    <label for="key_objective_breakdown"/>
+                                                    <h1>
+                                                        <field name="key_objective_breakdown" 
+                                                                options="{'no_create': True, 'no_open': True}"
+                                                                domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', result_type)]"
+                                                                placeholder="Select Objective Breakdown"/>
+                                                    </h1>
+                                                </div>
+                                                
+                                                <group>
+                                                    <group string="Measurement Configuration">
+                                                        <field name="team_id" 
                                                             options="{'no_create': True, 'no_open': True}"
-                                                            domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', result_type)]"
-                                                            placeholder="Select Objective Breakdown"/>
-                                                </h1>
-                                            </div>
-                                            
-                                            <group>
-                                                <group string="Measurement">
-                                                    <field name="team_id" 
-                                                        options="{'no_create': True, 'no_open': True}"
-                                                        domain="[('company_id', '=', parent.company_id), 
-                                                                ('department_id', '=', parent.department_id)]"/>
-                                                    <field name="breakdown_priority" readonly="1"/>
-                                                    <field name="metric" width="120"/>
-                                                    <field name="available_weightage" readonly="1"/>
-                                                    <field name="distributed_weightage"/>
-                                                    <!-- <field name="remaining_weightage" readonly="1"/> -->
+                                                            domain="[('company_id', '=', parent.company_id), 
+                                                                    ('department_id', '=', parent.department_id)]"/>
+                                                        <field name="breakdown_priority" readonly="1"/>
+                                                        <field name="metric" 
+                                                            options="{'no_open': True}"
+                                                            help="Type of measurement:\n• Percentage: For percentage-based metrics\n• Count: For numeric quantities\n• Rating: For scale-based ratings\n• Score: For points-based scoring"/>
+                                                        <field name="available_weightage" readonly="1"/>
+                                                        <field name="distributed_weightage"/>
+                                                    </group>
+                                                    <group string="Achievement">
+                                                        <field name="achieve" 
+                                                            help="Achievement status or assessment (To be configured)"
+                                                            placeholder="Enter achievement details"/>
+                                                        <field name="sequence"/>
+                                                    </group>
                                                 </group>
-                                                <group string="Progress">
-                                                    <field name="target_value"/>
-                                                    <field name="actual_value"/>
-                                                    <field name="progress" widget="percentpie" readonly="1"/>
-                                                    <field name="sequence"/>
-                                                </group>
-                                            </group>
 
-                                            <group string="Target Value">
-                                                <group>
-                                                    <label for="target_operator" string="Target"/>
-                                                    <div class="o_row">
-                                                        <field name="target_operator" class="oe_inline"/>
-                                                        <field name="target_value" class="oe_inline"/>
-                                                        <field name="target_unit" 
-                                                            placeholder="unit (e.g., sales, rejections)" 
-                                                            class="oe_inline"/>
-                                                    </div>
+                                                <group string="Target Value Configuration">
+                                                    <group string="Target Specification">
+                                                        <label for="target_operator" string="Target Criteria"/>
+                                                        <div class="o_row">
+                                                            <field name="target_operator" 
+                                                                class="oe_inline"
+                                                                help="Comparison operator (=, ≠, &gt;, &lt;, ≥, ≤)"/>
+                                                            <field name="target_value" 
+                                                                class="oe_inline"
+                                                                help="Target numeric value to achieve"/>
+                                                            <field name="target_unit" 
+                                                                placeholder="Unit (e.g., units, %, hours)" 
+                                                                class="oe_inline"
+                                                                help="Unit of measurement"/>
+                                                        </div>
+                                                    </group>
+                                                    <group>
+                                                        <field name="target_period" 
+                                                            placeholder="Time period (e.g., Q1, monthly)"
+                                                            help="Period for target achievement"/>
+                                                        <field name="target_display" readonly="1"
+                                                            help="Formatted target display"/>
+                                                    </group>
                                                 </group>
-                                                <group>
-                                                    <field name="target_period" 
-                                                        placeholder="e.g., in Q1, per month"/>
-                                                    <field name="target_display" readonly="1"/>
-                                                </group>
-                                            </group>
 
-                                            <group string="Actual Value">
-                                                <group>
-                                                    <label for="actual_operator" string="Actual"/>
-                                                    <div class="o_row">
-                                                        <field name="actual_operator" class="oe_inline"/>
-                                                        <field name="actual_value" class="oe_inline"/>
-                                                        <field name="actual_unit" 
-                                                            placeholder="unit" 
-                                                            class="oe_inline"/>
-                                                    </div>
+                                                <group string="Actual Value Configuration">
+                                                    <group string="Actual Achievement">
+                                                        <label for="actual_operator" string="Actual Criteria"/>
+                                                        <div class="o_row">
+                                                            <field name="actual_operator" 
+                                                                class="oe_inline"
+                                                                help="Comparison operator for actual value"/>
+                                                            <field name="actual_value" 
+                                                                class="oe_inline"
+                                                                help="Actual numeric value achieved/measured"/>
+                                                            <field name="actual_unit" 
+                                                                placeholder="Unit" 
+                                                                class="oe_inline"
+                                                                help="Unit of actual measurement"/>
+                                                        </div>
+                                                    </group>
+                                                    <group>
+                                                        <field name="actual_period" 
+                                                            placeholder="Time period"
+                                                            help="Period of actual measurement"/>
+                                                        <field name="actual_display" readonly="1"
+                                                            help="Formatted actual value display"/>
+                                                    </group>
                                                 </group>
-                                                <group>
-                                                    <field name="actual_period" 
-                                                        placeholder="e.g., in Q1, per month"/>
-                                                    <field name="actual_display" readonly="1"/>
-                                                </group>
-                                            </group>
-                                            <field name="result_type" invisible="1" force_save="1"/>
-                                        </sheet>
-                                    </form>
-                                </field>
-                            </group>
+                                                <field name="result_type" invisible="1" force_save="1"/>
+                                            </sheet>
+                                        </form>
+                                    </field>
 
-                            <!-- Common Weightage Table -->
-                            <group string="Common Key Results &amp; Weightage Distribution" name="common_weightage">
-                                <group>
-                                    <group string="Weightage Distributed from Objective Weightage">
-                                        <label for="team_id" string="Available Weightage"/>
-                                        <div>
-                                            <field name="allocated_common" readonly="1" class="oe_inline"/> %
-                                        </div>
-                                    </group>
-                                    <group string="Currently Distributed">
-                                        <label for="team_id" string="Total Distributed"/>
-                                        <div>
-                                            <field name="common_distributed_total" readonly="1" class="oe_inline"
-                                                decoration-danger="common_distributed_total &gt; allocated_common"
-                                                decoration-success="common_distributed_total &lt;= allocated_common"/> %
-                                        </div>
-                                    </group>
-                                </group>
-                                
-                                <field name="common_key_result_ids" context="{'weightage_type': 'common'}" nolabel="1">
-                                    <list editable="bottom" 
-                                        decoration-success="progress &gt;= 100"
-                                        decoration-info="progress &gt;= 75 and progress &lt; 100"
-                                        decoration-warning="progress &gt;= 50 and progress &lt; 75"
-                                        decoration-danger="progress &lt; 50"
-                                        class="o_key_result_list"
-                                        >
-                                        <!-- Common list fields (same as department) -->
-                                        <field name="sequence" widget="handle"/>
-                                        <field name="key_objective_breakdown"
+                                    <!-- COMMON KEY RESULTS LIST VIEW -->
+                                    <field name="common_key_result_ids" context="{'weightage_type': 'common'}" nolabel="1">
+                                        <list editable="bottom" class="o_key_result_list">
+                                            <!-- Common list fields -->
+                                            <field name="sequence" widget="handle"/>
+                                            <field name="key_objective_breakdown"
+                                                    options="{'no_create': True, 'no_open': True}"
+                                                    domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', 'common')]"
+                                                    width="150"/>
+                                            <field name="breakdown_priority" 
+                                                decoration-danger="breakdown_priority == 'high'"
+                                                decoration-warning="breakdown_priority == 'medium'"
+                                                decoration-info="breakdown_priority == 'low'"
+                                                width="100"/>
+                                            <field name="team_id" 
                                                 options="{'no_create': True, 'no_open': True}"
-                                                domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', 'common')]"
-                                                width="150"/>
-                                        <field name="breakdown_priority" 
-                                            decoration-danger="breakdown_priority == 'high'"
-                                            decoration-warning="breakdown_priority == 'medium'"
-                                            decoration-info="breakdown_priority == 'low'"
-                                            width="100"/>
-                                        <field name="team_id" 
-                                            options="{'no_create': True, 'no_open': True}"
-                                            domain="[('company_id', '=', parent.company_id), 
-                                                    ('department_id', '=', parent.department_id)]"
-                                            width="120"/>
-                                        <field name="metric" width="120"/>
-                                        <field name="actual_operator" optional="hide"/>
-                                        <field name="actual_value" width="100"/>
-                                        <field name="target_operator" optional="hide"/>
-                                        <field name="target_value" width="100"/>
-                                        <field name="progress" widget="progressbar" width="150" readonly="1"/>
-                                        <field name="distributed_weightage" sum="Total Distributed %"/>
-                                        <!-- <field name="available_weightage" readonly="1"/> -->
-                                        <!-- <field name="remaining_weightage" readonly="1" width="100"/> -->
-                                        
-                                        <!-- <field name="result_type" invisible="1" force_save="1"/> -->
-                                    </list>
-                                    <!-- Same form view as department -->
-                                    <form string="Key Result">
-                                        <sheet>
-                                            <div class="oe_title">
-                                                <label for="key_objective_breakdown"/>
-                                                <h1>
-                                                    <field name="key_objective_breakdown" 
+                                                domain="[('company_id', '=', parent.company_id), 
+                                                        ('department_id', '=', parent.department_id)]"
+                                                width="120"/>
+                                            <field name="metric" 
+                                                options="{'no_open': True}"
+                                                width="120"/>
+                                            <field name="actual_operator" optional="hide"/>
+                                            <field name="actual_value" width="100"/>
+                                            <field name="target_operator" optional="hide"/>
+                                            <field name="target_value" width="100"/>
+                                            <field name="achieve" 
+                                                readonly="0"
+                                                width="100"
+                                                help="Achievement status or assessment"/>
+                                            <field name="distributed_weightage" sum="Total Distributed %"/>
+                                        </list>
+                                        <!-- Same form view as department -->
+                                        <form string="Key Result">
+                                            <sheet>
+                                                <div class="oe_title">
+                                                    <label for="key_objective_breakdown"/>
+                                                    <h1>
+                                                        <field name="key_objective_breakdown" 
+                                                                options="{'no_create': True, 'no_open': True}"
+                                                                domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', result_type)]"
+                                                                placeholder="Select Objective Breakdown"/>
+                                                    </h1>
+                                                </div>
+                                                
+                                                <group>
+                                                    <group string="Measurement Configuration">
+                                                        <field name="team_id" 
                                                             options="{'no_create': True, 'no_open': True}"
-                                                            domain="[('okr_template_id', '=', parent.id), ('breakdown_type', '=', result_type)]"
-                                                            placeholder="Select Objective Breakdown"/>
-                                                </h1>
-                                            </div>
-                                            
-                                            <group>
-                                                <group string="Measurement">
-                                                    <field name="team_id" 
-                                                        options="{'no_create': True, 'no_open': True}"
-                                                        domain="[('company_id', '=', parent.company_id), 
-                                                                ('department_id', '=', parent.department_id)]"/>
-                                                    <field name="breakdown_priority" readonly="1"/>
-                                                    <field name="metric" width="120"/>
-                                                    <field name="available_weightage" readonly="1"/>
-                                                    <field name="distributed_weightage"/>
-                                                    <!-- <field name="remaining_weightage" readonly="1"/> -->
+                                                            domain="[('company_id', '=', parent.company_id), 
+                                                                    ('department_id', '=', parent.department_id)]"/>
+                                                        <field name="breakdown_priority" readonly="1"/>
+                                                        <field name="metric" 
+                                                            options="{'no_open': True}"
+                                                            help="Type of measurement:\n• Percentage: For percentage-based metrics\n• Count: For numeric quantities\n• Rating: For scale-based ratings\n• Score: For points-based scoring"/>
+                                                        <field name="available_weightage" readonly="1"/>
+                                                        <field name="distributed_weightage"/>
+                                                    </group>
+                                                    <group string="Achievement">
+                                                        <field name="achieve" 
+                                                            help="Achievement status or assessment (To be configured)"
+                                                            placeholder="Enter achievement details"/>
+                                                        <field name="sequence"/>
+                                                    </group>
                                                 </group>
-                                                <group string="Progress">
-                                                    <field name="target_value"/>
-                                                    <field name="actual_value"/>
-                                                    <field name="progress" widget="percentpie" readonly="1"/>
-                                                    <field name="sequence"/>
-                                                </group>
-                                            </group>
 
-                                            <group string="Target Value">
-                                                <group>
-                                                    <label for="target_operator" string="Target"/>
-                                                    <div class="o_row">
-                                                        <field name="target_operator" class="oe_inline"/>
-                                                        <field name="target_value" class="oe_inline"/>
-                                                        <field name="target_unit" 
-                                                            placeholder="unit (e.g., sales, rejections)" 
-                                                            class="oe_inline"/>
-                                                    </div>
+                                                <group string="Target Value Configuration">
+                                                    <group string="Target Specification">
+                                                        <label for="target_operator" string="Target Criteria"/>
+                                                        <div class="o_row">
+                                                            <field name="target_operator" 
+                                                                class="oe_inline"
+                                                                help="Comparison operator (=, ≠, &gt;, &lt;, ≥, ≤)"/>
+                                                            <field name="target_value" 
+                                                                class="oe_inline"
+                                                                help="Target numeric value to achieve"/>
+                                                            <field name="target_unit" 
+                                                                placeholder="Unit (e.g., units, %, hours)" 
+                                                                class="oe_inline"
+                                                                help="Unit of measurement"/>
+                                                        </div>
+                                                    </group>
+                                                    <group>
+                                                        <field name="target_period" 
+                                                            placeholder="Time period (e.g., Q1, monthly)"
+                                                            help="Period for target achievement"/>
+                                                        <field name="target_display" readonly="1"
+                                                            help="Formatted target display"/>
+                                                    </group>
                                                 </group>
-                                                <group>
-                                                    <field name="target_period" 
-                                                        placeholder="e.g., in Q1, per month"/>
-                                                    <field name="target_display" readonly="1"/>
-                                                </group>
-                                            </group>
 
-                                            <group string="Actual Value">
-                                                <group>
-                                                    <label for="actual_operator" string="Actual"/>
-                                                    <div class="o_row">
-                                                        <field name="actual_operator" class="oe_inline"/>
-                                                        <field name="actual_value" class="oe_inline"/>
-                                                        <field name="actual_unit" 
-                                                            placeholder="unit" 
-                                                            class="oe_inline"/>
-                                                    </div>
+                                                <group string="Actual Value Configuration">
+                                                    <group string="Actual Achievement">
+                                                        <label for="actual_operator" string="Actual Criteria"/>
+                                                        <div class="o_row">
+                                                            <field name="actual_operator" 
+                                                                class="oe_inline"
+                                                                help="Comparison operator for actual value"/>
+                                                            <field name="actual_value" 
+                                                                class="oe_inline"
+                                                                help="Actual numeric value achieved/measured"/>
+                                                            <field name="actual_unit" 
+                                                                placeholder="Unit" 
+                                                                class="oe_inline"
+                                                                help="Unit of actual measurement"/>
+                                                        </div>
+                                                    </group>
+                                                    <group>
+                                                        <field name="actual_period" 
+                                                            placeholder="Time period"
+                                                            help="Period of actual measurement"/>
+                                                        <field name="actual_display" readonly="1"
+                                                            help="Formatted actual value display"/>
+                                                    </group>
                                                 </group>
-                                                <group>
-                                                    <field name="actual_period" 
-                                                        placeholder="e.g., in Q1, per month"/>
-                                                    <field name="actual_display" readonly="1"/>
-                                                </group>
-                                            </group>
-                                            <field name="result_type" invisible="1" force_save="1"/>
-                                        </sheet>
-                                    </form>
-                                </field>
+                                                <field name="result_type" invisible="1" force_save="1"/>
+                                            </sheet>
+                                        </form>
+                                    </field>
                             </group>
                             <!-- Keep original field for compatibility but make it invisible -->
                             <field name="key_result_ids" invisible="1"/>
@@ -583,11 +576,6 @@
                             <field name="priority"/>
                             <field name="sequence"/>
                         </group>
-                        <!-- <group>
-                            <field name="created_by" readonly="1"/>
-                            <field name="created_datetime" readonly="1"/>
-                            <field name="okr_template_id" invisible="1"/>
-                        </group> -->
                     </group>
                 </sheet>
             </form>
@@ -602,10 +590,7 @@
             <list editable="bottom" decoration-danger="priority == 'high'" decoration-warning="priority == 'medium'" decoration-info="priority == 'low'">
                 <field name="sequence" widget="handle"/>
                 <field name="objective_item"/>
-                <!-- Use default selection rendering (inline dropdown in editable list) -->
                 <field name="priority"/>
-                <!-- <field name="created_by"/> -->
-                <!-- <field name="created_datetime"/> -->
             </list>
         </field>
     </record>
@@ -621,20 +606,14 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="goal"/>
-                <!-- <field name="objective_title"/> -->
                 <field name="priority" widget="badge" 
                        decoration-danger="priority=='high'"
                        decoration-warning="priority=='medium'"
                        decoration-success="priority=='low'"/>
                 <field name="department_id"/>
-                 <field name="selected_teams_display" string="Team"/> 
-                <!-- <field name="team_id"/> -->
+                <field name="selected_teams_display" string="Team"/>
                 <field name="start_date"/>
                 <field name="end_date"/>
-                <!-- <field name="key_result_count"/> -->
-                <!-- <field name="total_key_result_weightage" 
-                       decoration-danger="total_key_result_weightage != 100"
-                       decoration-success="total_key_result_weightage == 100"/> -->
                 <field name="company_id" groups="base.group_multi_company"/>
                 <field name="active" invisible="1"/>
             </list>
@@ -649,9 +628,7 @@
             <search string="Search OKR Templates">
                 <field name="name"/>
                 <field name="goal"/>
-                <!-- <field name="objective_title"/> -->
                 <field name="department_id"/>
-                <!-- <field name="team_id"/> -->
                 <field name="company_id"/>
                 
                 <filter string="High Priority" name="high_priority" 
@@ -661,16 +638,11 @@
                 <filter string="Low Priority" name="low_priority" 
                         domain="[('priority','=','low')]"/>
                 
-                
                 <separator/>
                 <filter string="Active" name="active" 
                         domain="[('active','=',True)]"/>
                 <filter string="Archived" name="inactive" 
                         domain="[('active','=',False)]"/>
-                
-                <separator/>
-                <!-- <filter string="Incomplete Weightage" name="incomplete_weightage"
-                        domain="[('total_key_result_weightage','!=',100)]"/> -->
                 
                 <group expand="0" string="Group By">
                     <filter string="Priority" name="group_priority" 
@@ -694,7 +666,6 @@
         <field name="arch" type="xml">
             <search>
                 <field name="objective_item"/>
-                <!-- <field name="created_by"/> -->
                 <separator/>
                 <filter string="High Priority" name="high_priority" 
                         domain="[('priority', '=', 'high')]"/>
@@ -705,8 +676,6 @@
                 <group expand="0" string="Group By">
                     <filter string="Priority" name="group_priority" 
                             context="{'group_by': 'priority'}"/>
-                    <!-- <filter string="Created By" name="group_created_by" 
-                            context="{'group_by': 'created_by'}"/> -->
                 </group>
             </search>
         </field>
@@ -719,19 +688,14 @@
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile">
                 <field name="name"/>
-                <!-- <field name="objective_title"/> -->
                 <field name="priority"/>
                 <field name="department_id"/>
-                <!-- <field name="key_result_count"/> -->
-                <!-- <field name="total_key_result_weightage"/> -->
+                <field name="key_result_count"/>
                 <templates>
                     <t t-name="card">
                         <div class="oe_kanban_content">
                             <div class="o_kanban_record_title">
                                 <field name="name"/>
-                            </div>
-                            <div class="o_kanban_record_subtitle">
-                                <!-- <field name="objective_title"/> -->
                             </div>
                             <div class="o_kanban_record_bottom">
                                 <div class="oe_kanban_bottom_left">

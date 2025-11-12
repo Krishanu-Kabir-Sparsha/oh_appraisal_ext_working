@@ -32,6 +32,8 @@
             # Fix paths to match directory structure
             "oh_appraisal_ext/static/src/js/dashboard.js",
             "oh_appraisal_ext/static/src/css/dashboard.css",
+            "oh_appraisal_ext/static/src/js/okr_help_icons.js",
+            "oh_appraisal_ext/static/src/css/okr_help_icons.scss",
             "oh_appraisal_ext/static/src/xml/dashboard_template.xml",
         ],
     },

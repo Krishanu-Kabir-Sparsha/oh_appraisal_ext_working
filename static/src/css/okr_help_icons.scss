@@ -1,0 +1,48 @@
+/* Help icon styling */
+.o_list_view .o_help_icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+    cursor: help;
+    vertical-align: middle;
+    user-select: none;
+}
+
+.o_list_view .o_help_icon:hover {
+    background-color: #1e40af;
+    transform: scale(1.1);
+}
+
+/* Add tooltips on hover */
+.o_list_view .o_help_icon {
+    position: relative;
+}
+
+/* Ensure it displays in column headers */
+.o_list_view thead th {
+    white-space: normal;
+}
+
+.o_list_view .o_help_icon:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1f2937;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    z-index: 1000;
+    pointer-events: none;
+}

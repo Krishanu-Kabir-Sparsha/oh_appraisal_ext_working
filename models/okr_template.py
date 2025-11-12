@@ -12,8 +12,8 @@ class OHAppraisalOKRTemplate(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'sequence, id'
 
-    name = fields.Char('Template Name', required=False, tracking=True)
-    goal = fields.Char('Goal', tracking=True)
+    name = fields.Char('Template Name', required=True, tracking=True)
+    goal = fields.Char('Goal', tracking=True, required=True, help="Overall goal of this OKR template")
     sequence = fields.Integer('Sequence', default=10)
     active = fields.Boolean('Active', default=True, tracking=True)
     company_id = fields.Many2one('res.company', 'Company', 
@@ -26,6 +26,7 @@ class OHAppraisalOKRTemplate(models.Model):
     objective_title_department = fields.Char(
         'Department Objective', 
         tracking=True,
+        required=True,
         help="Department specific objective"
     )
     objective_breakdown_department_ids = fields.One2many(
@@ -39,6 +40,7 @@ class OHAppraisalOKRTemplate(models.Model):
     objective_title_role = fields.Char(
         'Role Objective', 
         tracking=True,
+        required=True,
         help="Role specific objective"
     )
     objective_breakdown_role_ids = fields.One2many(
@@ -52,7 +54,8 @@ class OHAppraisalOKRTemplate(models.Model):
     objective_title_common = fields.Char(
         'Common Objective', 
         tracking=True,
-        help="Common objective"
+        required=True,
+        help="Common specific objective"
     )
     objective_breakdown_common_ids = fields.One2many(
         'oh.appraisal.objective.breakdown',
@@ -87,9 +90,10 @@ class OHAppraisalOKRTemplate(models.Model):
     department_id = fields.Many2one(
         'hr.department', 
         string='Department',
-        index=True,  # Add this line
+        index=True,
         domain="[('company_id', '=', company_id)]",
         tracking=True,
+        required=True,
         help="Department this OKR template applies to"
     )
     
@@ -154,10 +158,7 @@ class OHAppraisalOKRTemplate(models.Model):
         'okr_template_id',
         string='All Key Results'
     )
-    # # Computed fields
-    # total_key_result_weightage = fields.Float('Total KR Weightage', 
-    #                                         compute='_compute_total_weightage',
-    #                                         store=True)
+
     key_result_count = fields.Integer('Key Results Count', 
                                     compute='_compute_key_result_count')
 
@@ -302,13 +303,6 @@ class OHAppraisalOKRTemplate(models.Model):
             record.allocated_role = sum(record.weightage_ids.mapped('role_weightage'))
             record.allocated_common = sum(record.weightage_ids.mapped('common_weightage'))
 
-    # @api.depends('key_result_ids.weightage')
-    # def _compute_total_weightage(self):
-    #     for record in self:
-    #         record.total_key_result_weightage = sum(
-    #             record.key_result_ids.mapped('weightage')
-    #         )
-
     @api.depends('key_result_ids')
     def _compute_key_result_count(self):
         for record in self:
@@ -363,89 +357,7 @@ class OHAppraisalOKRTemplate(models.Model):
                 if abs(total_common - record.department_budget_common) > 0.01:
                     # Redistribute common weightage if it doesn't match budget
                     record._redistribute_common_weightage()
-   
-    
-    @api.constrains('department_weightage', 'role_weightage', 'common_weightage')
-    def _check_weightage_limits(self):
-        for record in self:
-            if not record.okr_template_id.department_id:
-                continue
 
-            # Get all weightages for this template
-            template_weightages = record.okr_template_id.weightage_ids
-
-            # Calculate totals including current record
-            total_dept = sum(template_weightages.mapped('department_weightage'))
-            total_role = sum(template_weightages.mapped('role_weightage'))
-            total_common = sum(template_weightages.mapped('common_weightage'))
-
-            # Get available budgets
-            available_dept = record.okr_template_id.department_budget_functional
-            available_role = record.okr_template_id.department_budget_role
-            available_common = record.okr_template_id.department_budget_common
-
-            # Check department weightage
-            if total_dept > available_dept:
-                raise ValidationError(_(
-                    "Total Department Weightage (%.2f%%) exceeds available budget (%.2f%%).\n"
-                    "Please reduce the allocation to stay within budget."
-                ) % (total_dept, available_dept))
-
-            # Check role weightage
-            if total_role > available_role:
-                raise ValidationError(_(
-                    "Total Role Weightage (%.2f%%) exceeds available budget (%.2f%%).\n"
-                    "Please reduce the allocation to stay within budget."
-                ) % (total_role, available_role))
-
-            # Check common weightage
-            if total_common > available_common:
-                raise ValidationError(_(
-                    "Total Common Weightage (%.2f%%) exceeds available budget (%.2f%%).\n"
-                    "Please reduce the allocation to stay within budget."
-                ) % (total_common, available_common))
-
-    @api.onchange('department_weightage', 'role_weightage', 'common_weightage')
-    def _onchange_weightages(self):
-        """Show warning if weightages exceed budget"""
-        warning = {}
-        if self.okr_template_id.department_id:
-            # Calculate totals
-            template_weightages = self.okr_template_id.weightage_ids
-            total_dept = sum(template_weightages.mapped('department_weightage'))
-            total_role = sum(template_weightages.mapped('role_weightage'))
-            total_common = sum(template_weightages.mapped('common_weightage'))
-
-            # Get available budgets
-            available_dept = self.okr_template_id.department_budget_functional
-            available_role = self.okr_template_id.department_budget_role
-            available_common = self.okr_template_id.department_budget_common
-
-            warning_messages = []
-
-            # Check each type of weightage
-            if total_dept > available_dept:
-                warning_messages.append(
-                    f"Department Weightage: {total_dept:.2f}% exceeds budget of {available_dept:.2f}%"
-                )
-            if total_role > available_role:
-                warning_messages.append(
-                    f"Role Weightage: {total_role:.2f}% exceeds budget of {available_role:.2f}%"
-                )
-            if total_common > available_common:
-                warning_messages.append(
-                    f"Common Weightage: {total_common:.2f}% exceeds budget of {available_common:.2f}%"
-                )
-
-            if warning_messages:
-                warning = {
-                    'title': _('Weightage Allocation Warning'),
-                    'message': _("The following allocations exceed their budgets:\n\n• ") + 
-                              "\n• ".join(warning_messages)
-                }
-                return {'warning': warning}
-
-    
     @api.onchange('company_id', 'department_id')
     def _onchange_company_department(self):
         """Handle changes in company or department selection"""
@@ -626,7 +538,6 @@ class OHAppraisalOKRTemplate(models.Model):
                 if abs(total_common - record.department_budget_common) > 0.01:
                     record._redistribute_common_weightage()
 
-
     def _check_weightage_allocation(self):
         """Validate total weightage allocation"""
         self.ensure_one()
@@ -659,7 +570,6 @@ class OHAppraisalOKRTemplate(models.Model):
         for record in self:
             record._check_weightage_allocation()
 
-
     @api.onchange('department_id')
     def _onchange_department(self):
         """Handle department change"""
@@ -685,7 +595,6 @@ class OHAppraisalOKRTemplate(models.Model):
                 }
             }
 
-
     @api.depends('company_id', 'department_id')
     def _compute_available_teams(self):
         """Compute available teams based on selected department"""
@@ -695,7 +604,6 @@ class OHAppraisalOKRTemplate(models.Model):
                 domain.append(('department_id', '=', record.department_id.id))
             record.available_team_ids = self.env['oh.appraisal.team'].search(domain)
 
-    
     @api.onchange('weightage_ids')
     def _onchange_weightage_ids(self):
         """When weightages change, redistribute common weightage and recompute"""
@@ -712,14 +620,6 @@ class OHAppraisalOKRTemplate(models.Model):
             if record.common_key_result_ids:
                 for kr in record.common_key_result_ids:
                     kr._compute_available_weightage()
-
-    # def write(self, vals):
-    #     """Override write to handle weightage updates"""
-    #     res = super().write(vals)
-    #     if 'weightage_ids' in vals:
-    #         self.mapped('key_result_ids')._compute_weightage()
-    #     return res
-    
 
     @api.depends('objective_breakdown_ids')
     def _compute_breakdown_count(self):
@@ -783,7 +683,6 @@ class OHAppraisalDepartmentWeightageStore(models.Model):
     ]
 
 
-
 class OHAppraisalOKRKeyResult(models.Model):
     _name = 'oh.appraisal.okr.key.result'
     _description = 'OKR Key Result'
@@ -795,7 +694,6 @@ class OHAppraisalOKRKeyResult(models.Model):
         ('common', 'Common')
     ], string='Result Type', required=True, default='department')
 
-    # Add the team field after okr_template_id
     okr_template_id = fields.Many2one('oh.appraisal.okr.template', 
                                      'OKR Template', 
                                      required=True, 
@@ -821,11 +719,18 @@ class OHAppraisalOKRKeyResult(models.Model):
     )
     
     metric = fields.Selection([
-        ('percentage', '%'),
-        ('count', 'Count'),
-        ('rating', 'Rating'),
-        ('score', 'Score')
-    ], string='Metric/Measure', required=True, default='percentage')
+        ('percentage', 'Percentage (%)'),
+        ('count', 'Count (Numeric)'),
+        ('rating', 'Rating (Scale)'),
+        ('score', 'Score (Points)')
+    ], string='Metric/Measure', default=False,  # Changed from False to ''
+    help="Select the type of measurement:\n"
+        "• Percentage: Measured as percentage value (0-100%)\n"
+        "• Count: Numeric count or quantity\n"
+        "• Rating: Scale-based rating (e.g., 1-5, 1-10)\n"
+        "• Score: Points-based scoring system\n"
+        "• Leave blank if no specific metric applies\n"
+        "• So, for any non-numerical value, use the blank option; else all values should be numeric.")
     
     # Target Value fields
     target_operator = fields.Selection([
@@ -835,10 +740,20 @@ class OHAppraisalOKRKeyResult(models.Model):
         ('lt', '<'),
         ('gte', '≥'),
         ('lte', '≤')
-    ], string='Target Operator', default='gte')
-    target_value = fields.Float('Target Value', required=True)
-    target_unit = fields.Char('Target Unit', help="e.g., rejections, sales, etc.")
-    target_period = fields.Char('Target Period', help="e.g., in Q1, per month, etc.")
+    ], string='Target Operator', default='gte',
+    help="Comparison operator for target achievement:\n"
+         "• = (Equal): Exact value required\n"
+         "• ≠ (Not Equal): Any value except specified\n"
+         "• > (Greater): Above specified value\n"
+         "• < (Less): Below specified value\n"
+         "• ≥ (Greater/Equal): At or above specified\n"
+         "• ≤ (Less/Equal): At or below specified")
+    target_value = fields.Float('Target Value', required=True,
+    help="Target numeric value to be achieved")
+    target_unit = fields.Char('Target Unit', 
+    help="Unit of measurement (e.g., units, sales, rejections, hours)")
+    target_period = fields.Char('Target Period', 
+    help="Time period for target (e.g., in Q1, per month, annually)")
     
     # Actual Value fields
     actual_operator = fields.Selection([
@@ -848,19 +763,27 @@ class OHAppraisalOKRKeyResult(models.Model):
         ('lt', '<'),
         ('gte', '≥'),
         ('lte', '≤')
-    ], string='Actual Operator', default='gte')
-    actual_value = fields.Float('Actual Value')
-    actual_unit = fields.Char('Actual Unit')
-    actual_period = fields.Char('Actual Period')
+    ], string='Actual Operator', default='gte',
+    help="Comparison operator for actual achievement:\n"
+         "• = (Equal): Exact value achieved\n"
+         "• ≠ (Not Equal): Any value except specified\n"
+         "• > (Greater): Exceeded specified value\n"
+         "• < (Less): Below specified value\n"
+         "• ≥ (Greater/Equal): At or above specified\n"
+         "• ≤ (Less/Equal): At or below specified")
+    actual_value = fields.Float('Actual Value',
+    help="Actual numeric value achieved/measured")
+    actual_unit = fields.Char('Actual Unit',
+    help="Unit of actual measurement")
+    actual_period = fields.Char('Actual Period',
+    help="Time period for actual measurement")
     
-    # Updated progress field to be computed
-    progress = fields.Float('Progress (%)', 
-                          digits=(5, 2),
-                          compute='_compute_progress',
-                          store=True,
-                          help="Auto-calculated progress: (Actual / Target) * 100")
+    # Achievement field (replacing progress)
+    achieve = fields.Char('Achieve',
+    help="Achievement status or assessment (To be configured)",
+    default='')
     
-    # Replace the weightage field with these new fields
+    # Weightage fields
     available_weightage = fields.Float(
         'Available Weightage (%)', 
         compute='_compute_available_weightage',
@@ -873,24 +796,7 @@ class OHAppraisalOKRKeyResult(models.Model):
         'Distributed Weightage (%)',
         digits=(5, 2),
         default=0.0,
-        help="Weightage allocated to this objective breakdown"
-    )
-
-    # remaining_weightage = fields.Float(
-    #     'Remaining Weightage (%)',
-    #     compute='_compute_remaining_weightage',
-    #     store=True,
-    #     digits=(5, 2),
-    #     help="Remaining weightage available for distribution"
-    # )
-
-
-    # data_source = fields.Selection([
-    #     ('manual', 'Manual Entry'),
-    #     ('jira', 'Jira'),
-    #     ('github', 'Github'),
-    #     ('lms', 'LMS')
-    # ], string='Data Source', default='manual', required=True)
+        help="Weightage allocated to this objective breakdown")
 
     # Display fields for better UX
     target_display = fields.Char('Target', compute='_compute_target_display', store=True)
@@ -955,27 +861,6 @@ class OHAppraisalOKRKeyResult(models.Model):
             else:
                 record.available_weightage = 0.0
 
-    @api.depends('team_id', 'available_weightage', 'distributed_weightage',
-                'okr_template_id.department_key_result_ids.distributed_weightage',
-                'okr_template_id.role_key_result_ids.distributed_weightage',
-                'okr_template_id.common_key_result_ids.distributed_weightage')
-    def _compute_remaining_weightage(self):
-        """Compute remaining weightage available for distribution"""
-        for record in self:
-            if record.team_id and record.available_weightage > 0:
-                # Get all records for this team and type
-                domain = [
-                    ('okr_template_id', '=', record.okr_template_id.id),
-                    ('team_id', '=', record.team_id.id),
-                    ('result_type', '=', record.result_type),
-                    ('id', '!=', record._origin.id)  # Exclude current record
-                ]
-                related_records = self.search(domain)
-                total_distributed = sum(related_records.mapped('distributed_weightage'))
-                record.remaining_weightage = max(0, record.available_weightage - total_distributed)
-            else:
-                record.remaining_weightage = 0.0
-
     @api.constrains('distributed_weightage', 'team_id', 'result_type')
     def _check_distributed_weightage(self):
         """Validate distributed weightage against allocated budget"""
@@ -1011,7 +896,6 @@ class OHAppraisalOKRKeyResult(models.Model):
                         allocated_budget
                     ))
 
-    
     @api.constrains('distributed_weightage', 'team_id', 'result_type')
     def _check_total_distributed_weightage(self):
         """Ensure total distributed weightage doesn't exceed allocated budget"""
@@ -1042,7 +926,6 @@ class OHAppraisalOKRKeyResult(models.Model):
                         dict(record._fields['result_type'].selection).get(record.result_type),
                         allocated_budget
                     ))
-
 
     @api.onchange('distributed_weightage')
     def _onchange_distributed_weightage(self):
@@ -1093,37 +976,6 @@ class OHAppraisalOKRKeyResult(models.Model):
                 else:  # department
                     self.available_weightage = weightage_record[0].department_weightage
 
-
-    @api.depends('actual_value', 'target_value')
-    def _compute_progress(self):
-        """
-        Compute progress percentage based on actual and target values
-        Formula: (Actual / Target) * 100
-        """
-        for record in self:
-            if record.target_value and record.target_value != 0:
-                try:
-                    progress = (record.actual_value / record.target_value) * 100
-                    # Round to 2 decimal places and ensure it doesn't exceed 100%
-                    record.progress = min(round(progress, 2), 100)
-                except (ZeroDivisionError, TypeError):
-                    record.progress = 0.0
-            else:
-                record.progress = 0.0
-
-    @api.onchange('actual_value', 'target_value')
-    def _onchange_values(self):
-        """Trigger progress recalculation when values change"""
-        if self.target_value and self.target_value != 0:
-            try:
-                progress = (self.actual_value / self.target_value) * 100
-                self.progress = min(round(progress, 2), 100)
-            except (ZeroDivisionError, TypeError):
-                self.progress = 0.0
-        else:
-            self.progress = 0.0
-
-    # Add validation constraints
     @api.constrains('target_value')
     def _check_target_value(self):
         for record in self:
@@ -1135,7 +987,6 @@ class OHAppraisalOKRKeyResult(models.Model):
         for record in self:
             if record.actual_value < 0:
                 raise ValidationError(_("Actual value cannot be negative."))
-
 
     @api.depends('target_operator', 'target_value', 'target_unit', 'target_period')
     def _compute_target_display(self):
@@ -1196,7 +1047,6 @@ class OHAppraisalOKRKeyResult(models.Model):
                 }
             }
         return {'domain': {'key_objective_breakdown': []}}
-            
 
     @api.constrains('key_objective_breakdown', 'result_type')
     def _check_breakdown_type_match(self):
@@ -1211,6 +1061,21 @@ class OHAppraisalOKRKeyResult(models.Model):
                     ),
                     dict(record._fields['result_type'].selection).get(record.result_type)
                 ))
+
+    @api.onchange('metric')
+    def _onchange_metric(self):
+        """Set default descriptions based on selected metric"""
+        metric_descriptions = {
+            'percentage': 'Measured as percentage (0-100%)',
+            'count': 'Measured as numeric count/quantity',
+            'rating': 'Measured on a rating scale',
+            'score': 'Measured in points'
+        }
+        
+        if self.metric and self.metric in metric_descriptions:  # This checks for non-empty string
+            if not self.target_unit:
+                self.target_unit = metric_descriptions[self.metric]
+
     
 class OHAppraisalObjectiveBreakdown(models.Model):
     _name = 'oh.appraisal.objective.breakdown'
@@ -1237,15 +1102,8 @@ class OHAppraisalObjectiveBreakdown(models.Model):
         ('medium', 'Medium'),
         ('low', 'Low')
     ], string='Priority', 
-       default='high', 
-    #    required=True, 
+       default='high',
        help="Priority level of this objective")
-    # created_by = fields.Char('Created By', 
-    #                         readonly=True,
-    #                         default=lambda self: self.env.user.login)
-    # created_datetime = fields.Datetime('Created On',
-    #                                  readonly=True,
-    #                                  default=lambda self: fields.Datetime.now())
 
     @api.model_create_multi
     def create(self, vals_list):
