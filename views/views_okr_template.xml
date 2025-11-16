@@ -165,9 +165,9 @@
                         <!-- Key Results Section -->
                         <page string="🎯 Key Results" name="key_results">
                             <!-- Department Weightage Table -->
-                            <group string="Department Key Results &amp; Weightage Distribution" name="department_weightage">
+                            <group>
                                 
-                                <group>
+                                <group string="Department Key Results &amp; Weightage Distribution" name="department_weightage">
                                     <group string="Weightage Distributed from Objective Weightage">
                                         <label for="team_id" string="Available Weightage"/>
                                         <div>
@@ -302,7 +302,22 @@
                                             </sheet>
                                         </form>
                                     </field>
-
+                                    <group string="Role Key Results &amp; Weightage Distribution" name="role_weightage">
+                                        <group string="Weightage Distributed from Objective Weightage">
+                                            <label for="team_id" string="Available Weightage"/>
+                                            <div>
+                                                <field name="allocated_role" readonly="1" class="oe_inline"/> %
+                                            </div>
+                                        </group>
+                                        <group string="Currently Distributed">
+                                            <label for="team_id" string="Total Distributed"/>
+                                            <div>
+                                                <field name="role_distributed_total" readonly="1" class="oe_inline"
+                                                    decoration-danger="role_distributed_total &gt; allocated_role"
+                                                    decoration-success="role_distributed_total &lt;= allocated_role"/> %
+                                            </div>
+                                        </group>
+                                    </group>
                                     <!-- ROLE KEY RESULTS LIST VIEW -->
                                     <field name="role_key_result_ids" context="{'weightage_type': 'role'}" nolabel="1">
                                         <list editable="bottom" class="o_key_result_list">
@@ -423,6 +438,22 @@
                                         </form>
                                     </field>
 
+                                    <group string="Common Key Results &amp; Weightage Distribution" name="common_weightage">
+                                        <group string="Weightage Distributed from Objective Weightage">
+                                            <label for="team_id" string="Available Weightage"/>
+                                            <div>
+                                                <field name="allocated_common" readonly="1" class="oe_inline"/> %
+                                            </div>
+                                        </group>
+                                        <group string="Currently Distributed">
+                                            <label for="team_id" string="Total Distributed"/>
+                                            <div>
+                                                <field name="common_distributed_total" readonly="1" class="oe_inline"
+                                                    decoration-danger="common_distributed_total &gt; allocated_common"
+                                                    decoration-success="common_distributed_total &lt;= allocated_common"/> %
+                                            </div>
+                                        </group>
+                                    </group>
                                     <!-- COMMON KEY RESULTS LIST VIEW -->
                                     <field name="common_key_result_ids" context="{'weightage_type': 'common'}" nolabel="1">
                                         <list editable="bottom" class="o_key_result_list">

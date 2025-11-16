@@ -14,6 +14,13 @@
               action="oh_app_ext_action_master_dashboard"
               sequence="5"/>
     
+    <!-- Teams -->
+    <menuitem id="menu_oh_appraisal_teams"
+              name="Teams"
+              parent="menu_oh_appraisal_configuration"
+              action="action_oh_appraisal_team"
+              sequence="10"/>
+    
     <!-- Assessment Framework Template (OKR) -->
     <menuitem id="menu_oh_appraisal_okr_template"
               name="OKR Template"
@@ -27,68 +34,4 @@
               parent="menu_oh_appraisal_configuration"
               action="action_oh_appraisal_scoring"
               sequence="30"/>
-    
-    <!-- Appraisal Templates -->
-    <!-- <menuitem id="menu_oh_appraisal_templates"
-              name="Appraisal Templates"
-              parent="menu_oh_appraisal_configuration"
-              action="oh_app_ext_action_templates"
-              sequence="40"/> -->
-    
-    
-    
-
-    <!-- Root menu: extends the existing Appraisal root -->
-    <!-- <menuitem id="oh_app_ext_menu_root"
-              name="Appraisal Advanced"
-              parent="oh_appraisal.hr_appraisal_menu_root"
-              groups="oh_appraisal.oh_appraisal_group_manager,oh_appraisal.oh_appraisal_group_employee"/> -->
-
-    <!-- Master -->
-    <!-- <menuitem id="oh_app_ext_menu_master"
-              name="Master Templates"
-              parent="oh_app_ext_menu_root"
-              action="oh_app_ext_action_master"
-              groups="oh_appraisal.oh_appraisal_group_manager"/> -->
-
-    <!-- Templates -->
-    <!-- <menuitem id="oh_app_ext_menu_templates"
-              name="Templates"
-              parent="oh_app_ext_menu_root"
-              action="oh_app_ext_action_templates"
-              groups="oh_appraisal.oh_appraisal_group_manager,oh_appraisal.oh_appraisal_group_employee"/> -->
-
-    <!-- Scoring -->
-    <!-- <menuitem id="oh_app_ext_menu_scoring"
-              name="Scoring Frameworks"
-              parent="oh_app_ext_menu_root"
-              action="oh_app_ext_action_scoring"
-              groups="oh_appraisal.oh_appraisal_group_manager"/> -->
-
-    <!-- Results & Analytics -->
-    <!-- <menuitem id="oh_app_ext_menu_results"
-              name="Results &amp; Analytics"
-              parent="oh_app_ext_menu_root"
-              sequence="20"
-              groups="oh_appraisal.oh_appraisal_group_manager"/>
-    <menuitem id="oh_app_ext_menu_results_list"
-              name="Appraisal Results"
-              parent="oh_app_ext_menu_results"
-              action="oh_app_ext_action_results"
-              groups="oh_appraisal.oh_appraisal_group_manager"/> -->
-
-    <!-- OKR & KPI -->
-    <!-- <menuitem id="oh_app_ext_menu_okr"
-              name="Objectives (OKR)"
-              parent="oh_app_ext_menu_root"
-              action="oh_app_ext_action_okr"
-              sequence="30"
-              groups="oh_appraisal.oh_appraisal_group_manager,oh_appraisal.oh_appraisal_group_employee"/>
-
-    <menuitem id="oh_app_ext_menu_kpi"
-              name="KPI Tracker"
-              parent="oh_app_ext_menu_root"
-              action="oh_app_ext_action_kpi"
-              sequence="40"
-              groups="oh_appraisal.oh_appraisal_group_manager"/>< -->
 </odoo>

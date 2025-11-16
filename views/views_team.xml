@@ -6,40 +6,133 @@
         <field name="model">oh.appraisal.team</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="action_create_sub_team" 
+                            type="object" 
+                            string="Create Sub-Team"
+                            class="btn-primary"
+                            icon="fa-plus"/>
+                </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button name="toggle_active" type="object" 
-                                class="oe_stat_button" icon="fa-archive">
-                            <field name="active" widget="boolean_button" 
+                        <button name="toggle_active" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-archive">
+                            <field name="active" 
+                                   widget="boolean_button" 
                                    options='{"terminology": "archive"}'/>
                         </button>
+                        
+                        <button name="action_view_members" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-users"
+                                invisible="member_count == 0">
+                            <field name="member_count" 
+                                   widget="statinfo" 
+                                   string="Members"/>
+                        </button>
+                        
+                        <button name="action_view_sub_teams" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-sitemap"
+                                invisible="child_count == 0">
+                            <field name="child_count" 
+                                   widget="statinfo" 
+                                   string="Sub-Teams"/>
+                        </button>
                     </div>
+                    
+                    <widget name="web_ribbon" 
+                            title="Archived" 
+                            bg_color="text-bg-danger" 
+                            invisible="active"/>
+                    
                     <div class="oe_title">
+                        <label for="name"/>
                         <h1>
-                            <field name="name" placeholder="Team Name"/>
+                            <field name="name" placeholder="e.g., Sales Team Alpha"/>
                         </h1>
+                        <h3 invisible="not parent_id">
+                            <field name="complete_name" readonly="1" class="text-muted"/>
+                        </h3>
                     </div>
+                    
                     <group>
-                        <!-- <group>
-                            <field name="code"/>
+                        <group string="Basic Information">
+                            <field name="code" placeholder="e.g., SALES-A"/>
+                            <field name="team_type"/>
+                            <field name="parent_id" options="{'no_create': True}"/>
                             <field name="sequence"/>
-                        </group> -->
-                        <group>
+                        </group>
+                        <group string="Organization">
                             <field name="company_id" 
                                    groups="base.group_multi_company"
-                                   options="{'no_create': True, 'no_open': True}"/>
-                            <field name="department_id"
-                                   options="{'no_create': True, 'no_open': True}"/>
-                        </group>
-                        <group>
-                            <field name="member_ids" widget="many2many_tags"
-                                options="{'no_create': True, 'color_field': 'color'}"/>
+                                   options="{'no_create': True}"/>
+                            <field name="department_id" options="{'no_create': True}"/>
+                            <field name="team_leader_id" options="{'no_create': True}"/>
+                            <field name="color" widget="color_picker"/>
                         </group>
                     </group>
-                    <group>
-                        <field name="description" placeholder="Add team description..."/>
-                    </group>
+                    
+                    <notebook>
+                        <page string="Team Members" name="members">
+                            <field name="member_ids" 
+                                   widget="many2many"
+                                   options="{'no_create': True}">
+                                <kanban>
+                                    <field name="id"/>
+                                    <field name="name"/>
+                                    <field name="work_email"/>
+                                    <field name="job_id"/>
+                                    <field name="image_128"/>
+                                    <templates>
+                                        <t t-name="card">
+                                            <div class="d-flex gap-2 align-items-center p-2">
+                                                <field name="image_128" widget="image" class="o_image_40_cover rounded-circle"/>
+                                                <div class="flex-grow-1 text-truncate">
+                                                    <strong class="d-block text-truncate">
+                                                        <field name="name"/>
+                                                    </strong>
+                                                    <div class="text-muted small text-truncate" t-if="record.job_id.value">
+                                                        <field name="job_id"/>
+                                                    </div>
+                                                    <div class="text-muted small text-truncate" t-if="record.work_email.value">
+                                                        <i class="fa fa-envelope me-1"/>
+                                                        <field name="work_email"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
+                            </field>
+                        </page>
+                        
+                        <page string="Sub-Teams" name="sub_teams" invisible="child_count == 0">
+                            <field name="child_ids" readonly="1">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="team_type"/>
+                                    <field name="team_leader_id"/>
+                                    <field name="member_count"/>
+                                </list>
+                            </field>
+                        </page>
+                        
+                        <page string="Description" name="description">
+                            <field name="description" placeholder="Team description, goals, and responsibilities..."/>
+                        </page>
+                        
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Internal notes..."/>
+                        </page>
+                    </notebook>
                 </sheet>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -50,13 +143,13 @@
         <field name="model">oh.appraisal.team</field>
         <field name="arch" type="xml">
             <list>
-                <!-- <field name="sequence" widget="handle"/> -->
-                <field name="name"/>
-                <!-- <field name="code"/> -->
+                <field name="sequence" widget="handle"/>
+                <field name="complete_name"/>
                 <field name="department_id"/>
-                <field name="member_ids" widget="many2many_tags"/>
-                <field name="company_id" groups="base.group_multi_company"/>
-                <field name="active" invisible="1"/>
+                <field name="team_leader_id"/>
+                <field name="member_count"/>
+                <field name="child_count"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
             </list>
         </field>
     </record>
@@ -69,16 +162,19 @@
             <search>
                 <field name="name"/>
                 <field name="code"/>
+                <field name="complete_name"/>
                 <field name="department_id"/>
-                <field name="company_id"/>
+                <field name="team_leader_id"/>
                 <separator/>
                 <filter string="Active" name="active" domain="[('active','=',True)]"/>
                 <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
+                <separator/>
+                <filter string="Parent Teams" name="parent_teams" domain="[('parent_id','=',False)]"/>
+                <filter string="Sub Teams" name="sub_teams" domain="[('parent_id','!=',False)]"/>
                 <group expand="0" string="Group By">
-                    <filter string="Department" name="group_department" 
-                            context="{'group_by':'department_id'}"/>
-                    <filter string="Company" name="group_company" 
-                            context="{'group_by':'company_id'}"/>
+                    <filter string="Parent Team" name="group_parent" context="{'group_by':'parent_id'}"/>
+                    <filter string="Department" name="group_department" context="{'group_by':'department_id'}"/>
+                    <filter string="Team Type" name="group_type" context="{'group_by':'team_type'}"/>
                 </group>
             </search>
         </field>
@@ -96,7 +192,7 @@
                 Create your first team!
             </p>
             <p>
-                Define teams for organizing appraisal objectives and key results.
+                Teams help organize employees for appraisal assessment.
             </p>
         </field>
     </record>
