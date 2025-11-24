@@ -210,10 +210,10 @@
                                             <field name="actual_value" width="100"/>
                                             <field name="target_operator" optional="hide"/>
                                             <field name="target_value" width="100"/>
-                                            <field name="achieve" 
+                                            <!-- <field name="achieve" 
                                                 readonly="0"
                                                 width="100"
-                                                help="Achievement status or assessment"/>
+                                                help="Achievement status or assessment"/> -->
                                             <field name="distributed_weightage" sum="Total Distributed %"/>
                                         </list>
                                         <form string="Key Result">
@@ -242,9 +242,9 @@
                                                         <field name="distributed_weightage"/>
                                                     </group>
                                                     <group string="Achievement">
-                                                        <field name="achieve" 
+                                                        <!-- <field name="achieve" 
                                                             help="Achievement status or assessment (To be configured)"
-                                                            placeholder="Enter achievement details"/>
+                                                            placeholder="Enter achievement details"/> -->
                                                         <field name="sequence"/>
                                                     </group>
                                                 </group>
@@ -344,10 +344,10 @@
                                             <field name="actual_value" width="100"/>
                                             <field name="target_operator" optional="hide"/>
                                             <field name="target_value" width="100"/>
-                                            <field name="achieve" 
+                                            <!-- <field name="achieve" 
                                                 readonly="0"
                                                 width="100"
-                                                help="Achievement status or assessment"/>
+                                                help="Achievement status or assessment"/> -->
                                             <field name="distributed_weightage" sum="Total Distributed %"/>
                                         </list>
                                         <!-- Same form view as department -->
@@ -377,9 +377,9 @@
                                                         <field name="distributed_weightage"/>
                                                     </group>
                                                     <group string="Achievement">
-                                                        <field name="achieve" 
+                                                        <!-- <field name="achieve" 
                                                             help="Achievement status or assessment (To be configured)"
-                                                            placeholder="Enter achievement details"/>
+                                                            placeholder="Enter achievement details"/> -->
                                                         <field name="sequence"/>
                                                     </group>
                                                 </group>
@@ -480,10 +480,10 @@
                                             <field name="actual_value" width="100"/>
                                             <field name="target_operator" optional="hide"/>
                                             <field name="target_value" width="100"/>
-                                            <field name="achieve" 
+                                            <!-- <field name="achieve" 
                                                 readonly="0"
                                                 width="100"
-                                                help="Achievement status or assessment"/>
+                                                help="Achievement status or assessment"/> -->
                                             <field name="distributed_weightage" sum="Total Distributed %"/>
                                         </list>
                                         <!-- Same form view as department -->
@@ -513,9 +513,9 @@
                                                         <field name="distributed_weightage"/>
                                                     </group>
                                                     <group string="Achievement">
-                                                        <field name="achieve" 
+                                                        <!-- <field name="achieve" 
                                                             help="Achievement status or assessment (To be configured)"
-                                                            placeholder="Enter achievement details"/>
+                                                            placeholder="Enter achievement details"/> -->
                                                         <field name="sequence"/>
                                                     </group>
                                                 </group>

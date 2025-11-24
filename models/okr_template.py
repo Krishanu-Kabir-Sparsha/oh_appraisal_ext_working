@@ -779,9 +779,9 @@ class OHAppraisalOKRKeyResult(models.Model):
     help="Time period for actual measurement")
     
     # Achievement field (replacing progress)
-    achieve = fields.Char('Achieve',
-    help="Achievement status or assessment (To be configured)",
-    default='')
+    # achieve = fields.Char('Achieve',
+    # help="Achievement status or assessment (To be configured)",
+    # default='')
     
     # Weightage fields
     available_weightage = fields.Float(
